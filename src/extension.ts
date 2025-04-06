@@ -3,12 +3,13 @@ import * as vsc from 'vscode'
 import * as ts from 'typescript'
 import { PostfixCompletionProvider } from './postfixCompletionProvider'
 import { notCommand, NOT_COMMAND } from './notCommand'
+import { activateColorCompletions } from './css-theme-completions'
 
 let completionProvider: vsc.Disposable
 
 export function activate(context: vsc.ExtensionContext): void {
+  activateColorCompletions(context)
   registerCompletionProvider(context)
-
   context.subscriptions.push(vsc.commands.registerTextEditorCommand(NOT_COMMAND, async (editor: vsc.TextEditor, _: vsc.TextEditorEdit, ...args: ts.BinaryExpression[]) => {
     const [...expressions] = args
 
