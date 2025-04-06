@@ -1,0 +1,9 @@
+**/**
+*/*
+!out/extension.js
+!images/logo.png
+
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE

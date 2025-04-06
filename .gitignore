@@ -1,0 +1,8 @@
+out
+node_modules
+/*.vsix
+/.vscode/symbols.json
+/coverage
+/.vscode-test
+yarn.lock
+package-lock.json
