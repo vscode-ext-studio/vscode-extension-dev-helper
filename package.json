@@ -185,7 +185,6 @@
   "scripts": {
     "vscode:prepublish": "node build.mjs --production",
     "compile": "node build.mjs",
-    "pretest": "node tasks.mjs pretest && tsc -p ./",
     "test": "cross-env NODE_ENV=test node ./out/test/runTests.js",
     "lint": "eslint .",
     "package": "vsce package --no-dependencies",
@@ -193,20 +192,14 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.192",
-    "@types/mocha": "^10.0.1",
     "@types/node": "^16.11.7",
     "@types/pluralize": "^0.0.29",
     "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
-    "@vscode/test-electron": "^2.3.0",
     "@vscode/vsce": "^2.18.0",
-    "cross-env": "^7.0.3",
     "esbuild": "^0.17.4",
-    "eslint": "^8.37.0",
-    "glob": "^8.1.0",
-    "mocha": "^10.2.0",
-    "source-map-support": "0.5.21"
+    "eslint": "^8.37.0"
   },
   "dependencies": {
     "lodash": "^4.17.21",
