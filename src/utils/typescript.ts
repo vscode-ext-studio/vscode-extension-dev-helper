@@ -1,10 +1,14 @@
 import * as ts from 'typescript'
-import * as _ from 'lodash'
 
 export const findNodeAtPosition = (source: ts.SourceFile, character: number): ts.Node | undefined => {
   const matchingNodes: INode[] = []
   source.statements.forEach(visitNode)
-  const sortedNodes = _.orderBy(matchingNodes, [m => m.width, m => m.depth], ['asc', 'desc'])
+  const sortedNodes = matchingNodes.sort((a, b) => {
+    if (a.width !== b.width) {
+      return a.width - b.width; // 升序排列宽度
+    }
+    return b.depth - a.depth; // 降序排列深度
+  })
 
   if (sortedNodes.length > 0) {
     return sortedNodes[0].node

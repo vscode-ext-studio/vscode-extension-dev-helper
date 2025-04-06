@@ -1,11 +1,15 @@
-import _ = require("lodash")
 import pluralize = require("pluralize")
 import ts = require("typescript")
 
 const MethodCallRegex = /^(get|read|create|retrieve|select|modify|update|use|find)(?<name>[A-Z].+?)?$/
 const CleanNameRegex = /((By|With|From).*$)|(Sync$)|.*(?=Items|Lines$)/
 
-const lowerFirst = (name: string) => name && _.lowerFirst(name)
+const lowerFirst = (name: string) => {
+  if (typeof name === 'string' && name.length > 0) {
+    return name.charAt(0).toLowerCase() + name.slice(1);
+  }
+  return name;
+}
 
 export const inferVarTemplateName = (node: ts.Node): string[] => {
   if (ts.isNewExpression(node)) {

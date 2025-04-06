@@ -191,7 +191,6 @@
     "deploy": "vsce publish"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.192",
     "@types/node": "^16.11.7",
     "@types/pluralize": "^0.0.29",
     "@types/vscode": "^1.68.0",
@@ -202,7 +201,6 @@
     "eslint": "^8.37.0"
   },
   "dependencies": {
-    "lodash": "^4.17.21",
     "pluralize": "github:plurals/pluralize#36f03cd2d573fa6d23e12e1529fa4627e2af74b4",
     "typescript": "^5.0.4",
     "vscode-html-languageservice": "^5.0.4",
