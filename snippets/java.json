@@ -1,0 +1,20 @@
+{
+    "Log": {
+        "prefix": [
+            "log",
+            "clg"
+        ],
+        "body": [
+            "logger.info($1);"
+        ]
+    },
+    "System.out.println": {
+        "prefix": [
+            "sout",
+            "sysout"
+        ],
+        "body": [
+            "System.out.println($1);"
+        ]
+    }
+}

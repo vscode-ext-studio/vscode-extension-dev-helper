@@ -32,6 +32,24 @@
   ],
   "main": "./out/extension",
   "contributes": {
+    "snippets": [
+      {
+        "language": "javascript",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "typescript",
+        "path": "./snippets/javascript.json"
+      },
+      {
+        "language": "java",
+        "path": "./snippets/java.json"
+      },
+      {
+        "language": "vue",
+        "path": "./snippets/vue.json"
+      }
+    ],
     "configuration": {
       "title": "Postfix completion",
       "properties": {

@@ -1,0 +1,23 @@
+{
+    "Console.Log": {
+        "prefix": [
+            "clg"
+        ],
+        "body": [
+            "console.log($1);"
+        ]
+    },
+    "Document.getElementById": {
+        "prefix": [
+            "gbid"
+        ],
+        "body": [
+            "document.getElementById($1);"
+        ]
+    },
+    "tryFinally": {
+        "prefix": "tryfinally",
+        "body": "try {\n\t$1\n} finally {\n\t$2\n}",
+        "description": "Try-Finally Statement"
+    }
+}
