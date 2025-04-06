@@ -1,7 +1,7 @@
 {
-  "name": "vscode-postfix-ts",
-  "displayName": "TS/JS postfix completion",
-  "description": "Postfix templates for TypeScript/Javascript",
+  "name": "extension-dev-helper",
+  "displayName": "Extension Development Helper",
+  "description": "Helper for VSCode Extension Development",
   "version": "2.0.0",
   "license": "MIT",
   "publisher": "cweijan",
@@ -187,7 +187,6 @@
     "compile": "node build.mjs",
     "pretest": "node tasks.mjs pretest && tsc -p ./",
     "test": "cross-env NODE_ENV=test node ./out/test/runTests.js",
-    "test-with-coverage": "c8 npm test",
     "lint": "eslint .",
     "package": "vsce package --no-dependencies",
     "deploy": "vsce publish"
@@ -202,7 +201,6 @@
     "@typescript-eslint/parser": "^5.57.1",
     "@vscode/test-electron": "^2.3.0",
     "@vscode/vsce": "^2.18.0",
-    "c8": "^7.13.0",
     "cross-env": "^7.0.3",
     "esbuild": "^0.17.4",
     "eslint": "^8.37.0",
