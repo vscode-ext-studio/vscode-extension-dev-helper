@@ -31,7 +31,7 @@ export class ForTemplate extends BaseForTemplate {
     const suffix = isAwaited ? ')' : ''
 
     return CompletionItemBuilder
-      .create('for', node, indentInfo)
+      .create('foreach', node, indentInfo)
       .replace(`for (let \${1:i} = 0; \${1} < \${2:${prefix}{{expr}}${suffix}}.length; \${1}++) {\n${getIndentCharacters()}\${0}\n}`)
       .build()
   }
@@ -69,7 +69,7 @@ export class ForOfTemplate extends BaseForTemplate {
     const itemNames = getArrayItemNames(node)
 
     return CompletionItemBuilder
-      .create('forof', node, indentInfo)
+      .create('for', node, indentInfo)
       .replace(`for (const ${getPlaceholderWithOptions(itemNames)} of \${2:{{expr}}}) {\n${getIndentCharacters()}\${0}\n}`)
       .build()
   }
