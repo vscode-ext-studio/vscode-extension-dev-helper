@@ -1,9 +1,9 @@
 'use strict'
 import * as vsc from 'vscode'
 import * as ts from 'typescript'
-import { PostfixCompletionProvider } from './postfixCompletionProvider'
-import { notCommand, NOT_COMMAND } from './notCommand'
-import { activateColorCompletions } from './css-theme-completions'
+import { PostfixCompletionProvider } from './postfix/postfixCompletionProvider'
+import { notCommand, NOT_COMMAND } from './postfix/notCommand'
+import { activateColorCompletions } from './postfix/css-theme-completions'
 
 let completionProvider: vsc.Disposable
 

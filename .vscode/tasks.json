@@ -19,7 +19,22 @@
 				"panel": "dedicated",
 				"reveal": "never"
 			},
-			"problemMatcher": "$esbuild-watch"
+			"problemMatcher": {
+				"owner": "esbuild",
+				"pattern": [
+					{
+						"regexp": "\\[esbuild\\] ERROR",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Building...",
+					"endsPattern": "build finished"
+				}
+			},
 		}
 	]
 }
