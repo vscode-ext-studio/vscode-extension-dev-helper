@@ -1,8 +1,8 @@
-import ts = require("typescript")
-import { CompletionItemBuilder } from "../completionItemBuilder"
-import { IndentInfo } from "../template"
-import { getConfigValue } from "../utils"
-import { BaseTemplate } from "./baseTemplates"
+import ts = require('typescript')
+import { CompletionItemBuilder } from '../completionItemBuilder'
+import { IndentInfo } from '../template'
+import { getConfigValue } from '../utils'
+import { BaseTemplate } from './baseTemplates'
 
 export class EqualityTemplate extends BaseTemplate {
   constructor(private keyword: string, private operator: string, private operand: string, private isUndefinedTemplate?: boolean) {

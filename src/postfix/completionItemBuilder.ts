@@ -115,8 +115,8 @@ export class CompletionItemBuilder {
   }
 
   private filters: { [key: string]: (x: string) => string } = {
-    'upper': (x: string) => x.toUpperCase(),
-    'lower': (x: string) => x.toLowerCase(),
-    'capitalize': (x: string) => x.substring(0, 1).toUpperCase() + x.substring(1),
+    upper: (x: string) => x.toUpperCase(),
+    lower: (x: string) => x.toLowerCase(),
+    capitalize: (x: string) => x.substring(0, 1).toUpperCase() + x.substring(1),
   }
 }

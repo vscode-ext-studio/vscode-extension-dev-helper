@@ -1,7 +1,7 @@
-import { Node } from "typescript"
-import { IndentInfo } from "../template"
-import { BaseTemplate } from "./baseTemplates"
-import { CompletionItemBuilder } from "../completionItemBuilder"
+import { Node } from 'typescript'
+import { IndentInfo } from '../template'
+import { BaseTemplate } from './baseTemplates'
+import { CompletionItemBuilder } from '../completionItemBuilder'
 
 export class CallTemplate extends BaseTemplate {
   constructor(private keyword: 'call') {
