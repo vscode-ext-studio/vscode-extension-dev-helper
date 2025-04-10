@@ -1,5 +1,5 @@
-import pluralize = require("pluralize")
-import ts = require("typescript")
+import inflection = require('inflection')
+import ts = require('typescript')
 
 const MethodCallRegex = /^(get|read|create|retrieve|select|modify|update|use|find)(?<name>[A-Z].+?)?$/
 const CleanNameRegex = /((By|With|From).*$)|(Sync$)|.*(?=Items|Lines$)/
@@ -33,10 +33,10 @@ export const inferForVarTemplate = (node: ts.Node): string[] => {
 
   const clean = ts.isCallExpression(node)
     ? beautifyMethodName(subjectName)
-    : subjectName.replace(/^(?:all)?(.+?)(?:List)?$/, "$1")
+    : subjectName.replace(/^(?:all)?(.+?)(?:List)?$/, '$1')
 
   return getUniqueVariants(clean)
-    .map(pluralize.singular)
+    .map(s => inflection.singularize(s))
     .filter(x => x !== clean)
     .map(lowerFirst)
 }
