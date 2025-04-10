@@ -50,9 +50,41 @@
         "path": "./snippets/vue.json"
       }
     ],
+    "commands": [
+      {
+        "command": "extension.runFile",
+        "title": "Run Current File",
+        "icon": "$(run)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "extension.runFile",
+          "when": "resourceLangId == javascript || resourceLangId == typescript",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
-      "title": "Postfix completion",
+      "title": "Extension Configuration",
       "properties": {
+        "runner.jsRunner": {
+          "type": "object",
+          "default": {
+            "command": "node",
+            "args": []
+          },
+          "description": "Configuration for JavaScript file runner"
+        },
+        "runner.tsRunner": {
+          "type": "object",
+          "default": {
+            "command": "tsx",
+            "args": []
+          },
+          "description": "Configuration for TypeScript file runner"
+        },
         "postfix.languages": {
           "type": "array",
           "description": "A list of languages in which the completion will be available",
