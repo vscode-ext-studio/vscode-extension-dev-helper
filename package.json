@@ -283,7 +283,14 @@
           "markdownDescription": "Defines how much packages can be analyzed together. A high value processes faster but consumes much more CPU. Set `0` to disable this limit (but use with moderation)."
         }
       }
-    }
+    },
+    "languages": [
+      {
+        "id": "jsonc",
+        "filenames": ["dependencies.jsonc"],
+        "aliases": ["JSON with Comments"]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "node build.mjs --production",

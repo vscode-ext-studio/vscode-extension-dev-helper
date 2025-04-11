@@ -3,6 +3,7 @@ import { PackageJsonCodeActionProvider } from './CodeAction'
 import { COMMAND_INSTALL, COMMAND_INSTALL_REQUEST, packageInstall, packageInstallRequest, } from './Command'
 import { diagnosticSubscribe, generatePackagesDiagnostics, } from './Diagnostic'
 import { lazyCallback } from './Utils'
+import { selector } from '../npmCheckCommon'
 
 export function activateOutdated(context: ExtensionContext): void {
   const diagnostics = languages.createDiagnosticCollection()
@@ -22,7 +23,7 @@ export function activateOutdated(context: ExtensionContext): void {
     }),
     commands.registerCommand(COMMAND_INSTALL, packageInstall),
     languages.registerCodeActionsProvider(
-      { language: 'json', pattern: '**/package.json', scheme: 'file' },
+      selector,
       new PackageJsonCodeActionProvider(),
       { providedCodeActionKinds: [CodeActionKind.QuickFix] }
     )

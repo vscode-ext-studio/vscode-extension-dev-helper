@@ -21,7 +21,7 @@ import { promiseLimit } from './Utils'
 const PACKAGE_JSON_PATH = `${sep}package.json`
 
 const isPackageJsonDocument = (document: TextDocument): boolean =>
-  document.fileName.endsWith(PACKAGE_JSON_PATH)
+  document.fileName.endsWith(PACKAGE_JSON_PATH) || document.fileName.endsWith('dependencies.jsonc')
 
 export const diagnosticSubscribe = (
   context: ExtensionContext,
