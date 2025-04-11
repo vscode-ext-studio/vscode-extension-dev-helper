@@ -14,6 +14,7 @@ import { PackageInfo } from './PackageInfo'
 import {
   getDecorationsMode,
   getParallelProcessesLimit,
+  getIgnorePackages,
 } from './Settings'
 import { promiseLimit } from './Utils'
 
@@ -176,6 +177,7 @@ export const generatePackagesDiagnostics = async (
 ): Promise<void> => {
   // Read dependencies from package.json to get the name of packages used.
   const packagesInfos = Object.values(await getDocumentPackages(document))
+  const ignorePackages = getIgnorePackages()
 
   const documentDecorations =
     getDecorationsMode() !== 'disabled'
@@ -202,6 +204,11 @@ export const generatePackagesDiagnostics = async (
       }
 
       if (packageInfo.isVersionComplex() || packageInfo.isVersionIgnorable()) {
+        return
+      }
+
+      // Skip packages that are in the ignore list
+      if (ignorePackages.includes(packageInfo.name)) {
         return
       }
 

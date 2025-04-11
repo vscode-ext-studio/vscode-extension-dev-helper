@@ -14,6 +14,11 @@ export const hasMajorUpdateProtection = (): boolean =>
     .getConfiguration()
     .get<boolean>(`${pluginName}.majorUpdateProtection`)!
 
+// List of package names to ignore when checking for outdated packages.
+// Default: [].
+export const getIgnorePackages = (): string[] =>
+  workspace.getConfiguration().get<string[]>(`${pluginName}.ignore`) ?? []
+
 // Displays decorations on the right side of packages.
 // Default: true.
 export const getDecorationsMode = (): 'fancy' | 'simple' | 'disabled' =>

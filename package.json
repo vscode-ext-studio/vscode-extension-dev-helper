@@ -221,6 +221,15 @@
           "uniqueItems": true,
           "default": []
         },
+        "npm-outdated.ignore": {
+          "order": 500,
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "List of package names to ignore when checking for outdated packages."
+        },
         "npm-outdated.level": {
           "order": 1000,
           "type": "string",
