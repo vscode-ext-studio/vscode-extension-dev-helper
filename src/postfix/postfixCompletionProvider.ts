@@ -3,9 +3,8 @@ import * as ts from 'typescript'
 
 import { IndentInfo, IPostfixTemplate } from './template'
 import { AllTabs, AllSpaces } from './utils/multiline-expressions'
-import { loadBuiltinTemplates, loadCustomTemplates } from './utils/templates'
+import { loadBuiltinTemplates } from './utils/templates'
 import { findNodeAtPosition } from './utils/typescript'
-import { CustomTemplate } from './templates/customTemplate'
 import { getHtmlLikeEmbedText } from './htmlLikeSupport'
 
 let currentSuggestion = undefined
@@ -14,18 +13,10 @@ export const overrideTsxEnabled = { value: false }
 
 export class PostfixCompletionProvider implements vsc.CompletionItemProvider {
   private templates: IPostfixTemplate[] = []
-  private customTemplateNames: string[] = []
-  private mergeMode: 'append' | 'override'
 
   constructor() {
-    this.mergeMode = vsc.workspace.getConfiguration('postfix.customTemplate').get('mergeMode', 'append')
-
-    const customTemplates = loadCustomTemplates()
-    this.customTemplateNames = customTemplates.map(t => t.templateName)
-
     this.templates = [
       ...loadBuiltinTemplates(),
-      ...customTemplates
     ]
   }
 
@@ -52,12 +43,7 @@ export class PostfixCompletionProvider implements vsc.CompletionItemProvider {
     try {
       return this.templates
         .filter(t => {
-          let canUseTemplate = t.canUse(ts.isNonNullExpression(node) ? node.expression : node)
-
-          if (this.mergeMode === 'override') {
-            canUseTemplate &&= (t instanceof CustomTemplate || !this.customTemplateNames.includes(t.templateName))
-          }
-
+          const canUseTemplate = t.canUse(ts.isNonNullExpression(node) ? node.expression : node)
           return canUseTemplate
         })
         .flatMap(t => t.buildCompletionItem(replacementNode, indentInfo))
