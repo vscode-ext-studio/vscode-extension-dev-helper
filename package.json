@@ -52,8 +52,13 @@
     "commands": [
       {
         "command": "extension.runFile",
-        "title": "Run Current File",
+        "title": "Run Script",
         "icon": "$(run)"
+      },
+      {
+        "command": "extension.debugFile",
+        "title": "Debug Script",
+        "icon": "$(debug)"
       },
       {
         "command": "npm.jumper.search",
@@ -65,7 +70,12 @@
         {
           "command": "extension.runFile",
           "when": "resourceLangId == javascript || resourceLangId == typescript",
-          "group": "navigation"
+          "group": "navigation@-2"
+        },
+        {
+          "command": "extension.debugFile",
+          "when": "resourceLangId == javascript || resourceLangId == typescript",
+          "group": "navigation@0"
         }
       ],
       "explorer/context": [
