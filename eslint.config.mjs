@@ -2,7 +2,7 @@ import tsEslint from 'typescript-eslint';
 import stylisticJs from '@stylistic/eslint-plugin-js';
 import unusedImports from 'eslint-plugin-unused-imports';
 
-// eslint "src/**/*.{ts,js,vue}" --fix
+// npx eslint "src/**/*.{ts,js}" --fix
 export default tsEslint.config(
     {
         ignores: ['**/*.d.ts', '**/*.test.ts']

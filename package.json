@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/vscode-ext-studio/vscode-extension-helper"
+    "url": "https://github.com/vscode-ext-studio/vscode-extension-dev-helper"
   },
   "bugs": {
-    "url": "https://github.com/vscode-ext-studio/vscode-extension-helper/issues"
+    "url": "https://github.com/vscode-ext-studio/vscode-extension-dev-helper/issues"
   },
   "activationEvents": [
     "onLanguage:javascript",
