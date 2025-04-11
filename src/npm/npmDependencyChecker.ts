@@ -1,19 +1,11 @@
 import { existsSync, readdirSync, statSync } from 'fs';
-import { format, join } from 'path';
+import { basename, format, join, resolve } from 'path';
 import * as vscode from 'vscode';
 import { ThemeIcon, Uri, languages } from 'vscode';
-import { findChildPackages } from './find-child-packages';
-import { findParentModules } from './find-parent-modules';
 import { sortFiles } from './util/sort-files';
 import { showError } from './util/utils';
 import { DependencyLinkProvider } from './provider/dependencyLinkProvider';
 import { activateOutdated } from './outdated/extension';
-
-let lastFolder = '';
-let lastWorkspaceName = '';
-let lastWorkspaceRoot = '';
-
-const nodeModules = 'node_modules';
 
 export function activateNpmDependencyCheck(context: vscode.ExtensionContext) {
     activateOutdated(context);
@@ -24,47 +16,23 @@ export function activateNpmDependencyCheck(context: vscode.ExtensionContext) {
     const folderIcon = Uri.file(join(context.extensionPath, 'icons', 'folder.svg'))
     const packageIcon = Uri.file(join(context.extensionPath, 'icons', 'nodejs.svg'))
 
-    const searchNodeModules = vscode.commands.registerCommand('npm.jumper.search', () => {
-        const preferences = vscode.workspace.getConfiguration('npm-dependency-jumper');
-
-        const useLastFolder = preferences.get('useLastFolder', false);
-        const nodeModulesPath = preferences.get('path', nodeModules);
-        const searchParentModules = preferences.get('searchParentModules', true);
-        const orderPriority = preferences.get('orderPriority', []);
-
+    const searchNodeModules = vscode.commands.registerCommand('npm.jumper.search', (option: Uri) => {
+        const nodeModulesPath = 'node_modules';
         const searchPath = async (workspaceName: string, workspaceRoot: string, folderPath: string) => {
-            // Path to node_modules in this workspace folder
-            const workspaceNodeModules = join(workspaceName, nodeModulesPath);
-
-            // Reset last folder
-            lastFolder = '';
-            lastWorkspaceName = '';
-            lastWorkspaceRoot = '';
-
-            // Path to current folder
             const folderFullPath = join(workspaceRoot, folderPath);
-
-            // Read folder, built quick pick with files/folder (and shortcuts)
-            const files = readdirSync(folderFullPath).filter(file => file !== '.package-lock.json');
+            const files = sortFiles(folderFullPath,
+                readdirSync(folderFullPath).filter(file => !file.startsWith('.'))
+            )
+            const workspaceNodeModules = join(workspaceName, nodeModulesPath);
             const isParentFolder = folderPath.includes('..');
-            const options = sortFiles(files, orderPriority);
-
-            // If searching in root node_modules, also include modules from parent folders, that are outside of the workspace
-            if (folderPath === nodeModulesPath) {
-                if (searchParentModules) {
-                    const parentModules = await findParentModules(workspaceRoot, nodeModulesPath);
-                    options.push(...parentModules);
-                }
-            } else {
-                // Otherwise, show option to move back to root
-                options.push('');
-                options.push(workspaceNodeModules);
-                // If current folder is not outside of the workspace, also add option to move a step back
+            if (folderPath != nodeModulesPath) {
+                files.push('');
+                files.push(workspaceNodeModules);
                 if (!isParentFolder) {
-                    options.push('..');
+                    files.push('..');
                 }
             }
-            const items = options.map(name => {
+            const items = files.map(name => {
                 const isPackageJson = name === 'package.json';
                 const filePath = join(folderFullPath, name);
                 let iconPath: Uri | ThemeIcon = null;
@@ -99,10 +67,6 @@ export function activateNpmDependencyCheck(context: vscode.ExtensionContext) {
                     if (stats.isDirectory()) {
                         searchPath(workspaceName, workspaceRoot, selectedPath);
                     } else {
-                        lastWorkspaceName = workspaceName;
-                        lastWorkspaceRoot = workspaceRoot;
-                        lastFolder = folderPath;
-
                         vscode.workspace.openTextDocument(selectedFullPath)
                             .then(vscode.window.showTextDocument);
                     }
@@ -110,66 +74,33 @@ export function activateNpmDependencyCheck(context: vscode.ExtensionContext) {
             });
         };
 
-        const getProjectFolder = async (workspaceFolder: vscode.WorkspaceFolder) => {
-            const packages = await findChildPackages(workspaceFolder.uri.fsPath);
-            // If in a lerna/yarn monorepo, prompt user to select which project to traverse
-            if (packages.length > 0) {
-                const selected = await vscode.window.showQuickPick(
-                    [
-                        { label: workspaceFolder.name, packageDir: '' }, // First option is the root dir
-                        ...packages.map(packageDir => ({ label: join(workspaceFolder.name, packageDir), packageDir }))
-                    ]
-                    , { placeHolder: 'Select Project' }
-                );
-                if (!selected) return;
-                return {
-                    name: selected.label,
-                    path: join(workspaceFolder.uri.fsPath, selected.packageDir)
-                };
-            }
-
-            // Otherwise, use the root folder
-            return {
-                name: workspaceFolder.name,
-                path: workspaceFolder.uri.fsPath
-            };
-        };
-
-        const getWorkspaceFolder = async () => {
-            // If in a multifolder workspace, prompt user to select which one to traverse.
-            if (vscode.workspace.workspaceFolders?.length > 1) {
-                const selected = await vscode.window.showQuickPick(vscode.workspace.workspaceFolders.map(folder => ({
-                    label: folder.name,
-                    folder
-                })), {
-                    placeHolder: 'Select workspace folder'
-                });
-
-                if (!selected) {
-                    return;
-                }
-
-                return selected.folder;
-            }
-
-            // Otherwise, use the first one
-            const folder = vscode.workspace.workspaceFolders[0];
-            return folder;
-        };
-
-        // Open last folder if there is one
-        if (useLastFolder && lastFolder) {
-            return searchPath(lastWorkspaceName, lastWorkspaceRoot, lastFolder);
+        if (option instanceof Uri) {
+            const path = resolve(option.fsPath, '..');
+            return searchPath(basename(path), path, nodeModulesPath);
         }
 
-        // Must have at least one workspace folder
+        const getWorkspaceFolder = async () => {
+            const folders = vscode.workspace.workspaceFolders
+            if (folders?.length > 1) {
+                const selected = await vscode.window.showQuickPick(
+                    folders.map(folder => ({ label: folder.name, folder })),
+                    { placeHolder: 'Select workspace folder' }
+                );
+                if (!selected) return;
+                return selected.folder;
+            }
+            return folders[0];
+        };
+
         if (!vscode.workspace.workspaceFolders?.length) {
             return showError('You must have a workspace opened.');
         }
 
-        getWorkspaceFolder().then(folder => folder && getProjectFolder(folder)).then(folder => {
+        getWorkspaceFolder().then(folder => {
             if (folder) {
-                searchPath(folder.name, folder.path, nodeModulesPath);
+                const name = folder.name;
+                const path = folder.uri.fsPath
+                searchPath(name, path, nodeModulesPath);
             }
         });
     });

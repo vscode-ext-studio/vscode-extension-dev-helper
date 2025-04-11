@@ -1,14 +1,27 @@
+import { statSync } from 'fs';
+
 type File = {
     original: string;
     lower: string;
+    isDirectory: boolean;
 };
 
-export const sortFiles = (origFiles: string[], origPriorities: string[]): string[] => {
-    const priorities = [...origPriorities].reverse().map(p => p.toLowerCase());
-    const files: File[] = origFiles.map(file => ({ original: file, lower: file.toLowerCase() }));
-    const rank = (file: string): number => priorities.indexOf(file) + 1;
+export const sortFiles = (folderFullPath: string, origFiles: string[]): string[] => {
+    const files: File[] = origFiles.map(file => {
+        const fullPath = `${folderFullPath}/${file}`;
+        return {
+            original: file,
+            lower: file.toLowerCase(),
+            isDirectory: statSync(fullPath).isDirectory()
+        };
+    });
 
     return files
-        .sort((a, b) => rank(b.lower) - rank(a.lower))
+        .sort((a, b) => {
+            if (a.isDirectory !== b.isDirectory) {
+                return a.isDirectory ? -1 : 1;
+            }
+            return a.lower.localeCompare(b.lower);
+        })
         .map(file => file.original);
 };
