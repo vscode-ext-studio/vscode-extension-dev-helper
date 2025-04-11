@@ -7,7 +7,7 @@ export function activateNpmDependencyCheck(context: ExtensionContext) {
     activateOutdated(context);
     context.subscriptions.push(
         activateSearchNodeModules(context),
-        languages.registerDocumentLinkProvider([
+        languages.registerDefinitionProvider([
             { pattern: '**/package.json' },
             { pattern: '**/dependencies.jsonc' }
         ], new DependencyLinkProvider()),
