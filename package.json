@@ -231,17 +231,17 @@
             "patch"
           ],
           "enumDescriptions": [
-            "%npm-outdated.configuration.level.major.description%",
-            "%npm-outdated.configuration.level.minor.description%",
-            "%npm-outdated.configuration.level.patch.description%"
+            "It will only display an update notice when there is a major version update (eg from 1.0.0 to 2.0.0).",
+            "It will only display an update notice when there is a minor version update (eg from 1.0.0 to 1.1.0).",
+            "It will only display an update notice when there is a patch version update (eg from 1.0.0 to 1.0.1)."
           ],
-          "markdownDescription": "%npm-outdated.configuration.level.description%"
+          "markdownDescription": "Minimum *semver* bump required for a package to display as outdated. See npm's [Semver docs](https://docs.npmjs.com/cli/v6/using-npm/semver) for more details."
         },
         "npm-outdated.majorUpdateProtection": {
           "order": 2000,
           "type": "boolean",
           "default": false,
-          "markdownDescription": "%npm-outdated.configuration.majorUpdateProtection.description%"
+          "markdownDescription": "Avoid suggesting that a package be upgraded to a `major` version directly. The suggestion will only happen if the user-defined version is the latest `minor` version available."
         },
         "npm-outdated.decorations": {
           "order": 3000,
@@ -252,26 +252,26 @@
             "disabled"
           ],
           "enumDescriptions": [
-            "%npm-outdated.configuration.decorations.fancy.description%",
-            "%npm-outdated.configuration.decorations.simple.description%",
-            "%npm-outdated.configuration.decorations.disabled.description%"
+            "Details are colorful and much easier to identify.",
+            "Details are displayed in a simpler, less flashy, but still informative way. Helps performance if you don't care about colors.",
+            "Details will not be displayed directly, but you will still see it when hovering over the package version in a tooltip."
           ],
-          "default": "fancy",
-          "markdownDescription": "%npm-outdated.configuration.decorations.description%"
+          "default": "disabled",
+          "markdownDescription": "Displays decorations on the right side of packages containing more details about upgrade possibilities."
         },
         "npm-outdated.cacheLifetime": {
           "order": 9000,
           "type": "number",
           "default": 60,
           "minimum": 1,
-          "markdownDescription": "%npm-outdated.configuration.cacheLifetime.description%"
+          "markdownDescription": "Time in minutes in which the versions of packages already analyzed will be kept internally. Performance improvement."
         },
         "npm-outdated.parallelProcessesLimit": {
           "order": 9100,
           "type": "number",
           "default": 20,
           "minimum": 0,
-          "markdownDescription": "%npm-outdated.configuration.parallelProcessesLimit.description%"
+          "markdownDescription": "Defines how much packages can be analyzed together. A high value processes faster but consumes much more CPU. Set `0` to disable this limit (but use with moderation)."
         }
       }
     }
@@ -294,8 +294,6 @@
     "typescript-eslint": "^8.29.1"
   },
   "dependencies": {
-    "glob": "^7.1.3",
-    "load-json-file": "^6.0.0",
     "inflection": "^3.0.2",
     "typescript": "^5.0.4",
     "vscode-snippet-parser": "^0.0.5"

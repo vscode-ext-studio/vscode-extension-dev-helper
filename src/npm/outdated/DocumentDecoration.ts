@@ -210,16 +210,6 @@ export class DocumentDecoration {
 
     const updateDetails = [
       new Message(
-        Icons.UPDATABLE,
-        ThemeLight.ICON_UPDATABLE,
-        ThemeDark.ICON_UPDATABLE
-      ),
-      new Message(
-        l10n.t('Update:'),
-        ThemeLight.LABEL_UPDATABLE,
-        ThemeDark.LABEL_UPDATABLE
-      ),
-      new Message(
         versionLatest,
         ThemeLight.LABEL_VERSION,
         ThemeDark.LABEL_VERSION
@@ -234,7 +224,7 @@ export class DocumentDecoration {
       // If the latest version is already installed, it informs that only a user-defined version will be bumped.
       updateDetails.push(
         new Message(
-          `(${l10n.t('already installed, just formalization')})`,
+          '✅',
           ThemeLight.LABEL_FORMALIZATION,
           ThemeDark.LABEL_FORMALIZATION
         )
@@ -245,7 +235,7 @@ export class DocumentDecoration {
     if (await packageInfo.packageRelated.requiresVersionMajorUpdate()) {
       updateDetails.push(
         new Message(
-          `(${l10n.t('major')})`,
+          `⬆️`,
           ThemeLight.LABEL_MAJOR,
           ThemeDark.LABEL_MAJOR
         )

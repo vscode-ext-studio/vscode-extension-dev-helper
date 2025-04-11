@@ -1,6 +1,6 @@
 export const Icons = {
   ADVISORY: '☢',
-  CHECKED: '✓',
+  CHECKED: '',
   CHECKING: '🗘',
   PENDING: '⭳',
   UPDATABLE: '🔄',
