@@ -21,14 +21,13 @@
     "url": "https://github.com/vscode-ext-studio/vscode-extension-dev-helper/issues"
   },
   "activationEvents": [
+    "onLanguage:json",
     "onLanguage:javascript",
     "onLanguage:typescript",
     "onLanguage:javascriptreact",
     "onLanguage:typescriptreact",
     "onLanguage:vue",
-    "onLanguage:html",
-    "onLanguage:svelte",
-    "workspaceContains:.enable-postfix"
+    "onLanguage:html"
   ],
   "main": "./out/extension",
   "contributes": {

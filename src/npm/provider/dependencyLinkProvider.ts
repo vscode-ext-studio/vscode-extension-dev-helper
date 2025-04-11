@@ -14,8 +14,8 @@ export class DependencyLinkProvider implements DocumentLinkProvider {
                 } else {
                     const matches = line.text.match(/"(.*?)"/);
                     if (matches) {
-                        links.push(this.buildLink(document, line, i, matches[1]));
                         links.push(this.buildLink(document, line, i, matches[1], true));
+                        links.push(this.buildLink(document, line, i, matches[1]));
                     }
                 }
             } else {
