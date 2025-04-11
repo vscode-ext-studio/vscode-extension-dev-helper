@@ -234,7 +234,6 @@
   "dependencies": {
     "inflection": "^3.0.2",
     "typescript": "^5.0.4",
-    "vscode-html-languageservice": "^5.0.4",
     "vscode-snippet-parser": "^0.0.5"
   }
 }
