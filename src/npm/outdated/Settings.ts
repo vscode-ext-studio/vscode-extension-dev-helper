@@ -14,13 +14,6 @@ export const hasMajorUpdateProtection = (): boolean =>
     .getConfiguration()
     .get<boolean>(`${pluginName}.majorUpdateProtection`)!
 
-// Identifies packages used with known security advisories.
-// Default: true.
-export const identifySecurityAdvisories = (): boolean =>
-  workspace
-    .getConfiguration()
-    .get<boolean>(`${pluginName}.identifySecurityAdvisories`)!
-
 // Displays decorations on the right side of packages.
 // Default: true.
 export const getDecorationsMode = (): 'fancy' | 'simple' | 'disabled' =>

@@ -243,12 +243,6 @@
           "default": false,
           "markdownDescription": "%npm-outdated.configuration.majorUpdateProtection.description%"
         },
-        "npm-outdated.identifySecurityAdvisories": {
-          "order": 2500,
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "%npm-outdated.configuration.identifySecurityAdvisories.description%"
-        },
         "npm-outdated.decorations": {
           "order": 3000,
           "type": "string",
