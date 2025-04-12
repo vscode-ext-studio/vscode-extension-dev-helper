@@ -63,6 +63,10 @@
       {
         "command": "npm.jumper.search",
         "title": "Search node_modules"
+      },
+      {
+        "command": "extension.gotoNpm",
+        "title": "Go to Npm"
       }
     ],
     "menus": {
@@ -83,6 +87,13 @@
           "command": "npm.jumper.search",
           "when": "explorerResourceIsFolder && resourceFilename == 'node_modules'",
           "group": "0navigation@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "extension.gotoNpm",
+          "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",
+          "group": "navigation@1"
         }
       ]
     },
