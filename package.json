@@ -93,7 +93,7 @@
         {
           "command": "extension.gotoNpm",
           "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",
-          "group": "navigation@1"
+          "group": "navigation@1.1"
         }
       ]
     },

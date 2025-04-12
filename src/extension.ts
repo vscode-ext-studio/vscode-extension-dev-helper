@@ -8,8 +8,8 @@ import { activateNpmGoto } from './npm/npmGotoCommand'
 export function activate(context: vsc.ExtensionContext): void {
   activatePostfix(context)
   activateRunner(context)
-  activateNpmDependencyCheck(context)
   activateNpmGoto(context)
+  activateNpmDependencyCheck(context)
 }
 
 export function deactivate(): void {
