@@ -49,6 +49,21 @@
         "path": "./snippets/vue.json"
       }
     ],
+    "grammars": [
+      {
+        "path": "./syntaxes/string-injection-sql.json",
+        "scopeName": "inline-sql.injection",
+        "injectTo": [
+          "source.java",
+          "source.js",
+          "source.ts",
+          "source.tsx"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.sql": "sql"
+        }
+      }
+    ],
     "commands": [
       {
         "command": "extension.runFile",
@@ -308,8 +323,12 @@
     "languages": [
       {
         "id": "jsonc",
-        "filenames": ["dependencies.jsonc"],
-        "aliases": ["JSON with Comments"]
+        "filenames": [
+          "dependencies.jsonc"
+        ],
+        "aliases": [
+          "JSON with Comments"
+        ]
       }
     ]
   },

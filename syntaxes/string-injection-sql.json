@@ -1,0 +1,35 @@
+{
+    "scopeName": "inline-sql.injection",
+    "fileTypes": [
+        "py",
+        "js",
+        "jsx",
+        "ts",
+        "tsx",
+        "java",
+        "rb",
+        "cs",
+        "rs",
+        "php"
+    ],
+    "injectionSelector": [
+        "text.html.php",
+        "L:source -comment -string"
+    ],
+    "patterns": [
+        {
+            "begin": "(?i)([\"'`]|(\"\"\")) *(SELECT( +|$)|INSERT +INTO|DELETE +FROM|UPDATE +.*? +SET|CREATE +TABLE)",
+            "beginCaptures": {
+                "3": {
+                    "name": "keyword.sql"
+                }
+            },
+            "end": "(?<!\\\\)\\1",
+            "patterns": [
+                {
+                    "include": "source.sql"
+                }
+            ]
+        }
+    ]
+}
