@@ -82,6 +82,16 @@
       {
         "command": "extension.gotoNpm",
         "title": "Go to Npm"
+      },
+      {
+        "command": "extension.closeOtherTerminals",
+        "title": "Close Other Terminals",
+        "icon": "$(close-all)"
+      },
+      {
+        "command": "extension.closeAllTerminals",
+        "title": "Close All Terminals",
+        "icon": "$(close-all)"
       }
     ],
     "menus": {
@@ -109,6 +119,17 @@
           "command": "extension.gotoNpm",
           "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",
           "group": "navigation@1.1"
+        }
+      ],
+      "terminal/context": [
+        {
+          "command": "extension.closeOtherTerminals",
+          "when": "terminalCount > 1",
+          "group": "navigation"
+        },
+        {
+          "command": "extension.closeAllTerminals",
+          "group": "navigation"
         }
       ]
     },
