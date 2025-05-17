@@ -131,6 +131,13 @@
           "command": "extension.closeAllTerminals",
           "group": "navigation"
         }
+      ],
+      "terminal/title/context": [
+        {
+          "command": "extension.closeOtherTerminals",
+          "when": "terminalCount > 1",
+          "group": "navigation"
+        }
       ]
     },
     "configuration": {

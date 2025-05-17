@@ -35,7 +35,7 @@ export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
                     codeLenses.push(new vscode.CodeLens(range, {
                         title: `$(run) ${script}`,
                         command: 'extension.npm.runScript',
-                        arguments: [script]
+                        arguments: [script, document.uri]
                     }));
                 }
             }
@@ -49,8 +49,11 @@ export function activateNpmScriptCodeLens(context: vscode.ExtensionContext) {
     const provider = new NpmScriptCodeLensProvider();
     context.subscriptions.push(
         vscode.languages.registerCodeLensProvider(selector, provider),
-        vscode.commands.registerCommand('extension.npm.runScript', (script: string) => {
-            const terminal = vscode.window.createTerminal('NPM Script');
+        vscode.commands.registerCommand('extension.npm.runScript', (script: string, uri: vscode.Uri) => {
+            const terminal = vscode.window.createTerminal({
+                name: 'NPM Script',
+                cwd: path.dirname(uri.fsPath)
+            });
             terminal.sendText(`npm run ${script}`);
             terminal.show();
         }),
@@ -58,8 +61,12 @@ export function activateNpmScriptCodeLens(context: vscode.ExtensionContext) {
             const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
             if (!workspaceFolder) return;
 
-            const hasNpmLock = fs.existsSync(path.join(workspaceFolder.uri.fsPath, 'package-lock.json'));
-            const terminal = vscode.window.createTerminal('Package Install');
+            const packageJsonDir = path.dirname(uri.fsPath);
+            const hasNpmLock = fs.existsSync(path.join(packageJsonDir, 'package-lock.json'));
+            const terminal = vscode.window.createTerminal({
+                name: 'Package Install',
+                cwd: packageJsonDir
+            });
 
             if (hasNpmLock) {
                 terminal.sendText('npm install --registry https://registry.npmmirror.com');
