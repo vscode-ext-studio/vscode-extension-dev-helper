@@ -85,7 +85,7 @@ async function hasPackageJson(filePath: string): Promise<boolean> {
 }
 
 async function runFileInTerminal(filePath: string, runnerConfig: RunnerConfig) {
-    if (!terminal || terminal.exitStatus) {
+    if (!terminal || terminal.exitStatus || terminal.state.shell == 'node') {
         terminal = window.createTerminal('Runner')
     }
 
