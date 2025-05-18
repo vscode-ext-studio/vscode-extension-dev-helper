@@ -92,6 +92,11 @@
         "command": "extension.closeAllTerminals",
         "title": "Close All Terminals",
         "icon": "$(close-all)"
+      },
+      {
+        "command": "extension.npm.jumpToScripts",
+        "title": "Jump to Scripts",
+        "icon": "$(debug)"
       }
     ],
     "menus": {
@@ -105,6 +110,11 @@
           "command": "extension.debugFile",
           "when": "resourceLangId == javascript || resourceLangId == typescript",
           "group": "navigation@0"
+        },
+        {
+          "command": "extension.npm.jumpToScripts",
+          "when": "resourceFilename == package.json",
+          "group": "navigation@1"
         }
       ],
       "explorer/context": [
