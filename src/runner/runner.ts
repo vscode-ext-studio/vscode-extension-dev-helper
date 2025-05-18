@@ -1,6 +1,8 @@
 import { ExtensionContext, window, commands, workspace, Terminal, debug, TextEditor, TextDocument } from 'vscode'
 import { exec } from 'child_process'
 import { promisify } from 'util'
+import * as path from 'path'
+import * as fs from 'fs'
 
 const execAsync = promisify(exec)
 
@@ -72,11 +74,30 @@ function getRunnerConfig(document: TextDocument): RunnerConfig {
         : config.get('tsRunner') || defaultTsRunner
 }
 
+async function hasPackageJson(filePath: string): Promise<boolean> {
+    const directory = path.dirname(filePath)
+    const packageJsonPath = path.join(directory, 'package.json')
+    return new Promise(resolve => {
+        fs.access(packageJsonPath, fs.constants.F_OK, (err) => {
+            resolve(!err)
+        })
+    })
+}
+
 async function runFileInTerminal(filePath: string, runnerConfig: RunnerConfig) {
     if (!terminal || terminal.exitStatus) {
         terminal = window.createTerminal('Runner')
     }
-    const command = `${runnerConfig.command} ${filePath}`
+
+    const directory = path.dirname(filePath)
+    const hasPackageJsonFile = await hasPackageJson(filePath)
+
+    if (hasPackageJsonFile) {
+        terminal.sendText(`cd "${directory}"\n`)
+    }
+
+    const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
+    const command = `${ignoreWarnings} ${runnerConfig.command} ${filePath}`
     terminal.show()
     terminal.sendText(command)
 }
