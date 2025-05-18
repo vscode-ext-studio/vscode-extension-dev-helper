@@ -69,7 +69,7 @@ export class ForOfTemplate extends BaseForTemplate {
     const itemNames = getArrayItemNames(node)
 
     return CompletionItemBuilder
-      .create('for', node, indentInfo)
+      .create(this.templateName, node, indentInfo)
       .replace(`for (const ${getPlaceholderWithOptions(itemNames)} of \${2:{{expr}}}) {\n${getIndentCharacters()}\${0}\n}`)
       .build()
   }

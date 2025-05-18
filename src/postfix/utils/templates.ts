@@ -14,6 +14,7 @@ export const loadBuiltinTemplates = () => {
     new VarTemplate('const'),
     new AwaitTemplate('await'),
     new ForOfTemplate('for'),
+    new ForOfTemplate('forof'),
     new ForInTemplate('forin'),
     new ForTemplate('foreach'),
   ]
