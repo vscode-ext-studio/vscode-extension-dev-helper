@@ -3,17 +3,13 @@ import * as vscode from 'vscode';
 export function activateTerminalManager(context: vscode.ExtensionContext): void {
     // 注册关闭其他终端的命令
     context.subscriptions.push(
-        vscode.commands.registerCommand('extension.closeOtherTerminals', () => {
-            const terminals = vscode.window.terminals;
-            const activeTerminal = vscode.window.activeTerminal;
-
+        vscode.commands.registerCommand('extension.closeOtherTerminals', (activeTerminal = vscode.window.activeTerminal) => {
             if (!activeTerminal) return;
-
-            terminals.forEach(terminal => {
+            for (const terminal of vscode.window.terminals) {
                 if (terminal !== activeTerminal) {
                     terminal.dispose();
                 }
-            });
+            }
         })
     );
 
