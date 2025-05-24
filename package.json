@@ -129,6 +129,18 @@
           "command": "extension.gotoNpm",
           "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",
           "group": "navigation@1.1"
+        },
+        {
+          "command": "workbench.action.reloadWindow",
+          "group": "0_dev@1"
+        },
+        {
+          "command": "workbench.action.showCommands",
+          "group": "0_dev@3"
+        },
+        {
+          "command": "workbench.action.toggleDevTools",
+          "group": "0_dev@5"
         }
       ],
       "terminal/context": [
