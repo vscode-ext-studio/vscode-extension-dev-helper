@@ -7,13 +7,13 @@ import { activateNpmGoto } from './npm/npmGotoCommand'
 import { activateNpmScriptCodeLens } from './npm/provider/npmScriptCodeLens'
 import { activateTerminalManager } from './terminal/terminalManager'
 
-const jumpToScripts = async (uri: vsc.Uri) => {
+const jumpToSection = async (uri: vsc.Uri, section: string) => {
   const document = await vsc.workspace.openTextDocument(uri)
   await vsc.window.showTextDocument(document)
   const text = document.getText()
-  const scriptsMatch = /"scripts"\s*:\s*{/.exec(text)
-  if (scriptsMatch) {
-    const position = document.positionAt(scriptsMatch.index)
+  const sectionMatch = new RegExp(`"${section}"\\s*:\\s*{`).exec(text)
+  if (sectionMatch) {
+    const position = document.positionAt(sectionMatch.index)
     const editor = vsc.window.activeTextEditor
     if (editor) {
       editor.selection = new vsc.Selection(position, position)
@@ -21,6 +21,10 @@ const jumpToScripts = async (uri: vsc.Uri) => {
     }
   }
 }
+
+const jumpToScripts = (uri: vsc.Uri) => jumpToSection(uri, 'scripts')
+const jumpToDependencies = (uri: vsc.Uri) => jumpToSection(uri, 'dependencies')
+const jumpToDevDependencies = (uri: vsc.Uri) => jumpToSection(uri, 'devDependencies')
 
 export function activate(context: vsc.ExtensionContext): void {
   activatePostfix(context)
@@ -30,7 +34,9 @@ export function activate(context: vsc.ExtensionContext): void {
   activateNpmDependencyCheck(context)
   activateTerminalManager(context)
   context.subscriptions.push(
-    vsc.commands.registerCommand('extension.npm.jumpToScripts', jumpToScripts)
+    vsc.commands.registerCommand('extension.npm.jumpToScripts', jumpToScripts),
+    vsc.commands.registerCommand('extension.npm.jumpToDependencies', jumpToDependencies),
+    vsc.commands.registerCommand('extension.npm.jumpToDevDependencies', jumpToDevDependencies)
   )
 }
 

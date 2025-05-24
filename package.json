@@ -95,8 +95,24 @@
       },
       {
         "command": "extension.npm.jumpToScripts",
-        "title": "Jump to Scripts",
-        "icon": "$(debug)"
+        "title": "Scripts",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "extension.npm.jumpToDependencies",
+        "title": "Dependencies",
+        "icon": "$(package)"
+      },
+      {
+        "command": "extension.npm.jumpToDevDependencies",
+        "title": "Dev Dependencies",
+        "icon": "$(tools)"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "package.goto",
+        "label": "Go to"
       }
     ],
     "menus": {
@@ -110,11 +126,6 @@
           "command": "extension.debugFile",
           "when": "resourceLangId == javascript || resourceLangId == typescript",
           "group": "navigation@0"
-        },
-        {
-          "command": "extension.npm.jumpToScripts",
-          "when": "resourceFilename == package.json",
-          "group": "navigation@1"
         }
       ],
       "explorer/context": [
@@ -124,11 +135,30 @@
           "group": "0navigation@1"
         }
       ],
+      "package.goto": [
+        {
+          "command": "extension.npm.jumpToScripts",
+          "group": "1_goto@1"
+        },
+        {
+          "command": "extension.npm.jumpToDependencies",
+          "group": "1_goto@2"
+        },
+        {
+          "command": "extension.npm.jumpToDevDependencies",
+          "group": "1_goto@3"
+        }
+      ],
       "editor/context": [
         {
           "command": "extension.gotoNpm",
           "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",
-          "group": "navigation@1.1"
+          "group": "navigation@0.1"
+        },
+        {
+          "submenu": "package.goto",
+          "when": "resourceFilename == package.json",
+          "group": "navigation@0.3"
         },
         {
           "command": "workbench.action.reloadWindow",
@@ -388,7 +418,7 @@
     "test": "cross-env NODE_ENV=test node ./out/test/runTests.js",
     "lint": "eslint .",
     "package": "vsce package --no-dependencies",
-    "deploy": "vsce publish"
+    "public": "vsce publish"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^4.2.0",
