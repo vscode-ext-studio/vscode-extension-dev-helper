@@ -19,7 +19,9 @@ const defaultTsRunner: RunnerConfig = {
     command: 'tsx'
 }
 
-let terminal: Terminal | undefined
+interface TerminalStore {
+    [cwd: string]: Terminal;
+}
 
 export function activateRunner(context: ExtensionContext) {
     context.subscriptions.push(
@@ -85,29 +87,41 @@ async function hasPackageJson(filePath: string): Promise<boolean> {
 }
 
 async function runFileInTerminal(filePath: string, runnerConfig: RunnerConfig) {
+    const cwd = await getWorkingDirectory(filePath)
+    if (!cwd) return;
+
+    let terminal = window.terminals.find(t => (t.creationOptions as any).cwd === cwd);
     if (!terminal || terminal.exitStatus || terminal.state.shell == 'node') {
-        terminal = window.createTerminal('Runner')
+        terminal = window.createTerminal({ cwd, name: path.basename(cwd) });
     }
 
-    const directory = path.dirname(filePath)
-    const hasPackageJsonFile = await hasPackageJson(filePath)
-
-    if (hasPackageJsonFile) {
-        terminal.sendText(`cd "${directory}"\n`)
-    }
-
+    const relativePath = path.relative(cwd, filePath)
     const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
-    const command = `${ignoreWarnings} ${runnerConfig.command} ${filePath}`
+    const command = `${ignoreWarnings} ${runnerConfig.command} ${relativePath}`
     terminal.show()
     terminal.sendText(command)
 }
 
+async function getWorkingDirectory(filePath: string): Promise<string | undefined> {
+    const rootPath = workspace.rootPath
+    const isNotInWorkspace = !filePath.startsWith(rootPath);
+
+    const hasPackageJsonFile = await hasPackageJson(filePath)
+    if (hasPackageJsonFile || isNotInWorkspace) {
+        return path.dirname(filePath)
+    }
+
+    return rootPath
+}
+
 async function debugFile(filePath: string, runnerConfig: RunnerConfig) {
+    const cwd = await getWorkingDirectory(filePath)
     const debugConfig = {
         type: 'node',
         request: 'launch',
         name: 'Debug Current File',
         program: filePath,
+        cwd,
         skipFiles: ['<node_internals>/**'],
         runtimeExecutable: runnerConfig.command,
         runtimeArgs: runnerConfig.args || [],
