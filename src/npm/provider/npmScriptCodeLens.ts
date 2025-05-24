@@ -21,7 +21,7 @@ export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
             const range = new vscode.Range(position, position);
 
             codeLenses.push(new vscode.CodeLens(range, {
-                title: `$(package) Install`,
+                title: `$(cloud-download) Install`,
                 command: 'extension.npm.installDependencies',
                 arguments: [document.uri]
             }));
