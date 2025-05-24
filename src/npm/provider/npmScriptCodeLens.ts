@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { selector } from '../npmCheckCommon';
+import { getTerminalByCwd, getWorkingDirectory, ignoreWarnings } from '../../runner/runner';
 
 let terminal: vscode.Terminal | undefined;
 
@@ -48,35 +49,19 @@ export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
 }
 
 export function activateNpmScriptCodeLens(context: vscode.ExtensionContext) {
-    const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
     const provider = new NpmScriptCodeLensProvider();
     context.subscriptions.push(
         vscode.languages.registerCodeLensProvider(selector, provider),
-        vscode.commands.registerCommand('extension.npm.runScript', (script: string, uri: vscode.Uri) => {
-            if (!terminal || terminal.exitStatus || terminal.state.shell == 'node') {
-                terminal = vscode.window.createTerminal({
-                    name: 'NPM Script',
-                    cwd: path.dirname(uri.fsPath)
-                });
-            }
-            terminal.sendText(`cd "${path.dirname(uri.fsPath)}"`);
+        vscode.commands.registerCommand('extension.npm.runScript', async (script: string, uri: vscode.Uri) => {
+            const cwd = await getWorkingDirectory(uri.fsPath)
+            const terminal = getTerminalByCwd(cwd)
             terminal.sendText(`${ignoreWarnings} npm run ${script}`);
             terminal.show();
         }),
         vscode.commands.registerCommand('extension.npm.installDependencies', async (uri: vscode.Uri) => {
-            const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-            if (!workspaceFolder) return;
-
-            const packageJsonDir = path.dirname(uri.fsPath);
-            const hasNpmLock = fs.existsSync(path.join(packageJsonDir, 'package-lock.json'));
-
-            if (!terminal || terminal.exitStatus) {
-                terminal = vscode.window.createTerminal({
-                    name: 'NPM Script',
-                    cwd: packageJsonDir
-                });
-            }
-            terminal.sendText(`cd "${packageJsonDir}"`);
+            const cwd = await getWorkingDirectory(uri.fsPath)
+            const hasNpmLock = fs.existsSync(path.join(cwd, 'package-lock.json'));
+            const terminal = getTerminalByCwd(cwd);
             if (hasNpmLock) {
                 terminal.sendText('npm install --registry https://registry.npmmirror.com');
             } else {

@@ -1,6 +1,6 @@
 import { CodeActionKind, commands, ExtensionContext, languages, TextDocument, } from 'vscode'
 import { PackageJsonCodeActionProvider } from './CodeAction'
-import { COMMAND_INSTALL, COMMAND_INSTALL_REQUEST, packageInstall, packageInstallRequest, } from './Command'
+import { COMMAND_INSTALL_REQUEST, packageInstallRequest, } from './Command'
 import { diagnosticSubscribe, generatePackagesDiagnostics, } from './Diagnostic'
 import { lazyCallback } from './Utils'
 import { selector } from '../npmCheckCommon'
@@ -21,10 +21,8 @@ export function activateOutdated(context: ExtensionContext): void {
     commands.registerCommand(COMMAND_INSTALL_REQUEST, (document: TextDocument) => {
       packageInstallRequest(document)
     }),
-    commands.registerCommand(COMMAND_INSTALL, packageInstall),
     languages.registerCodeActionsProvider(
-      selector,
-      new PackageJsonCodeActionProvider(),
+      selector, new PackageJsonCodeActionProvider(),
       { providedCodeActionKinds: [CodeActionKind.QuickFix] }
     )
   )

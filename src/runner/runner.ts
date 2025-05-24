@@ -86,23 +86,26 @@ async function hasPackageJson(filePath: string): Promise<boolean> {
     })
 }
 
+export const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
+
 async function runFileInTerminal(filePath: string, runnerConfig: RunnerConfig) {
     const cwd = await getWorkingDirectory(filePath)
-    if (!cwd) return;
-
-    let terminal = window.terminals.find(t => (t.creationOptions as any).cwd === cwd);
-    if (!terminal || terminal.exitStatus || terminal.state.shell == 'node') {
-        terminal = window.createTerminal({ cwd, name: path.basename(cwd) });
-    }
-
+    const terminal = getTerminalByCwd(cwd)
     const relativePath = path.relative(cwd, filePath)
-    const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
     const command = `${ignoreWarnings} ${runnerConfig.command} ${relativePath}`
     terminal.show()
     terminal.sendText(command)
 }
 
-async function getWorkingDirectory(filePath: string): Promise<string | undefined> {
+export function getTerminalByCwd(cwd: string): Terminal {
+    let terminal = window.terminals.find(t => (t.creationOptions as any).cwd === cwd);
+    if (!terminal || terminal.exitStatus || terminal.state.shell == 'node') {
+        terminal = window.createTerminal({ cwd, name: path.basename(cwd) });
+    }
+    return terminal;
+}
+
+export async function getWorkingDirectory(filePath: string): Promise<string | undefined> {
     const rootPath = workspace.rootPath
     const isNotInWorkspace = !filePath.startsWith(rootPath);
 
