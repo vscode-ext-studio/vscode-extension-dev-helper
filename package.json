@@ -62,6 +62,17 @@
         "embeddedLanguages": {
           "meta.embedded.sql": "sql"
         }
+      },
+      {
+        "path": "./syntaxes/mapper-sql-injection.json",
+        "scopeName": "inline-sql.mapper-injection",
+        "injectTo": [
+          "text.xml"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.sql": "sql"
+        },
+        "pattern": "*mapper.xml"
       }
     ],
     "commands": [

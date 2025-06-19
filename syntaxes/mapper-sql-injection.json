@@ -1,0 +1,15 @@
+{
+  "scopeName": "inline-sql.mapper-injection",
+  "fileTypes": ["xml"],
+  "injectionSelector": "L:text.xml -comment -string",
+  "patterns": [
+    {
+      "begin": "(?<=<(sql|select|insert|update|delete)[^>]*>)",
+      "end": "(?=</(sql|select|insert|update|delete)>)",
+      "patterns": [
+        { "include": "text.xml" },
+        { "include": "source.sql" }
+      ]
+    }
+  ]
+}
