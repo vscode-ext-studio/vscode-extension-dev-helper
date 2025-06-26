@@ -4,8 +4,6 @@ import * as path from 'path';
 import { selector } from '../npmCheckCommon';
 import { getTerminalByCwd, getWorkingDirectory, ignoreWarnings } from '../../runner/runner';
 
-let terminal: vscode.Terminal | undefined;
-
 export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
     private regex: RegExp = /"scripts"\s*:\s*{([^}]*})/;
 
@@ -16,7 +14,6 @@ export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
         const matches = this.regex.exec(text);
 
         if (matches) {
-            // Add install dependencies CodeLenses
             const position = document.positionAt(matches.index);
             const range = new vscode.Range(position, position);
 
@@ -25,17 +22,44 @@ export class NpmScriptCodeLensProvider implements vscode.CodeLensProvider {
                 command: 'extension.npm.installDependencies',
                 arguments: [document.uri]
             }));
-            // Add run script CodeLenses
-            const scriptsObj = JSON.parse(`{${matches[1]}`);
-            const scripts = Object.keys(scriptsObj);
-            for (const script of scripts) {
-                const pattern = new RegExp(`"${script}"\\s*:\\s*"`);
-                const match = pattern.exec(text);
-                if (match) {
-                    const position = document.positionAt(match.index);
-                    const range = new vscode.Range(position, position);
 
-                    codeLenses.push(new vscode.CodeLens(range, {
+            const startIdx = text.indexOf('{', matches.index);
+            if (startIdx !== -1) {
+                let braceCount = 0;
+                let inString = false;
+                let escape = false;
+                let endIdx = startIdx;
+                for (let i = startIdx; i < text.length; i++) {
+                    const char = text[i];
+                    if (escape) {
+                        escape = false;
+                        continue;
+                    }
+                    if (char === '\\') {
+                        escape = true;
+                        continue;
+                    }
+                    if (char === '"') {
+                        inString = !inString;
+                        continue;
+                    }
+                    if (!inString) {
+                        if (char === '{') braceCount++;
+                        if (char === '}') braceCount--;
+                        if (braceCount === 0) {
+                            endIdx = i;
+                            break;
+                        }
+                    }
+                }
+                const scriptsText = text.substring(startIdx, endIdx + 1);
+                const scriptRegex = /"([^"]+)"\s*:/g;
+                let match: RegExpExecArray | null;
+                while ((match = scriptRegex.exec(scriptsText)) !== null) {
+                    const script = match[1];
+                    const scriptPos = document.positionAt(startIdx + match.index);
+                    const scriptRange = new vscode.Range(scriptPos, scriptPos);
+                    codeLenses.push(new vscode.CodeLens(scriptRange, {
                         title: `$(run) ${script}`,
                         command: 'extension.npm.runScript',
                         arguments: [script, document.uri]
