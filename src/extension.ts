@@ -6,6 +6,7 @@ import { activateNpmDependencyCheck } from './npm/npmDependencyChecker'
 import { activateNpmGoto } from './npm/npmGotoCommand'
 import { activateNpmScriptCodeLens } from './npm/provider/npmScriptCodeLens'
 import { activateTerminalManager } from './terminal/terminalManager'
+import { activateTinypng } from './tinypng/tinypng'
 
 const jumpToSection = async (uri: vsc.Uri, section: string) => {
   const document = await vsc.workspace.openTextDocument(uri)
@@ -33,6 +34,7 @@ export function activate(context: vsc.ExtensionContext): void {
   activateNpmScriptCodeLens(context)
   activateNpmDependencyCheck(context)
   activateTerminalManager(context)
+  activateTinypng(context)
   context.subscriptions.push(
     vsc.commands.registerCommand('extension.npm.jumpToScripts', jumpToScripts),
     vsc.commands.registerCommand('extension.npm.jumpToDependencies', jumpToDependencies),

@@ -21,6 +21,8 @@
     "url": "https://github.com/vscode-ext-studio/vscode-extension-dev-helper/issues"
   },
   "activationEvents": [
+    "onCommand:extension.tinypng.compressOverwrite",
+    "onCommand:extension.tinypng.compressWithSuffix",
     "onLanguage:json",
     "onLanguage:javascript",
     "onLanguage:typescript",
@@ -118,12 +120,24 @@
         "command": "extension.npm.jumpToDevDependencies",
         "title": "Dev Dependencies",
         "icon": "$(tools)"
+      },
+      {
+        "command": "extension.tinypng.compressOverwrite",
+        "title": "覆盖原文件"
+      },
+      {
+        "command": "extension.tinypng.compressWithSuffix",
+        "title": "另存为副本"
       }
     ],
     "submenus": [
       {
         "id": "package.goto",
         "label": "Go to"
+      },
+      {
+        "id": "tinypng.compress",
+        "label": "TinyPNG 压缩"
       }
     ],
     "menus": {
@@ -144,6 +158,21 @@
           "command": "npm.jumper.search",
           "when": "explorerResourceIsFolder && resourceFilename == 'node_modules'",
           "group": "0navigation@1"
+        },
+        {
+          "submenu": "tinypng.compress",
+          "when": "resourceExtname == .png",
+          "group": "7_modification@1"
+        }
+      ],
+      "tinypng.compress": [
+        {
+          "command": "extension.tinypng.compressOverwrite",
+          "group": "1_compress@1"
+        },
+        {
+          "command": "extension.tinypng.compressWithSuffix",
+          "group": "1_compress@2"
         }
       ],
       "package.goto": [
@@ -408,6 +437,18 @@
           "default": 20,
           "minimum": 0,
           "markdownDescription": "Defines how much packages can be analyzed together. A high value processes faster but consumes much more CPU. Set `0` to disable this limit (but use with moderation)."
+        },
+        "tinypng.apiKey": {
+          "order": 100,
+          "type": "string",
+          "default": "",
+          "markdownDescription": "TinyPNG API Key。在 [TinyPNG Developer API](https://tinypng.com/developers) 注册后获取。"
+        },
+        "tinypng.outputSuffix": {
+          "order": 200,
+          "type": "string",
+          "default": "-min",
+          "markdownDescription": "选择「另存为副本」时，在文件名与 `.png` 之间插入的后缀。例如 `logo.png` 变为 `logo-min.png`。"
         }
       }
     },
