@@ -23,6 +23,7 @@
   "activationEvents": [
     "onCommand:extension.tinypng.compressOverwrite",
     "onCommand:extension.tinypng.compressWithSuffix",
+    "onCommand:extension.explorer.createDateMarkdown",
     "onLanguage:json",
     "onLanguage:javascript",
     "onLanguage:typescript",
@@ -128,6 +129,10 @@
       {
         "command": "extension.tinypng.compressWithSuffix",
         "title": "另存为副本"
+      },
+      {
+        "command": "extension.explorer.createDateMarkdown",
+        "title": "New Today Markdown"
       }
     ],
     "submenus": [
@@ -154,6 +159,11 @@
         }
       ],
       "explorer/context": [
+        {
+          "command": "extension.explorer.createDateMarkdown",
+          "when": "!explorerResourceIsFile",
+          "group": "navigation@7"
+        },
         {
           "command": "npm.jumper.search",
           "when": "explorerResourceIsFolder && resourceFilename == 'node_modules'",

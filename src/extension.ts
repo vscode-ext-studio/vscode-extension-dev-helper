@@ -6,6 +6,7 @@ import { activateNpmDependencyCheck } from './npm/npmDependencyChecker'
 import { activateNpmGoto } from './npm/npmGotoCommand'
 import { activateNpmScriptCodeLens } from './npm/provider/npmScriptCodeLens'
 import { activateTerminalManager } from './terminal/terminalManager'
+import { activateCreateDateMarkdown } from './explorer/createDateMarkdown'
 import { activateTinypng } from './tinypng/tinypng'
 import { activateVueNavigation } from './vue/activateVueNavigation'
 
@@ -35,6 +36,7 @@ export function activate(context: vsc.ExtensionContext): void {
   activateNpmScriptCodeLens(context)
   activateNpmDependencyCheck(context)
   activateTerminalManager(context)
+  activateCreateDateMarkdown(context)
   activateTinypng(context)
   activateVueNavigation(context)
   context.subscriptions.push(
