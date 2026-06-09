@@ -2,7 +2,7 @@
   "name": "extension-dev-helper",
   "displayName": "Extension Development Helper",
   "description": "Helper for VSCode Extension Development",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "license": "MIT",
   "publisher": "cweijan",
   "engines": {
