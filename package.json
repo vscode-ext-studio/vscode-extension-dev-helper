@@ -480,7 +480,7 @@
     "test": "cross-env NODE_ENV=test node ./out/test/runTests.js",
     "lint": "eslint .",
     "package": "vsce package --no-dependencies",
-    "public": "vsce publish"
+    "public": "vsce publish && ovsx publish"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin-js": "^4.2.0",
