@@ -32,6 +32,11 @@
     "onLanguage:typescriptreact",
     "onLanguage:vue",
     "onLanguage:html",
+    "onLanguage:css",
+    "onLanguage:less",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:stylus",
     "onLanguage:java",
     "onLanguage:xml"
   ],
@@ -487,6 +492,7 @@
     }
   },
   "scripts": {
+    "generate:tailwind": "node scripts/generate-tailwind-data.mjs",
     "vscode:prepublish": "node build.mjs --production",
     "compile": "node build.mjs",
     "test": "cross-env NODE_ENV=test node ./out/test/runTests.js",
@@ -498,9 +504,11 @@
     "@stylistic/eslint-plugin-js": "^4.2.0",
     "@types/node": "^20.17.23",
     "@types/vscode": "^1.68.0",
+    "culori": "4.0.1",
     "esbuild": "^0.17.4",
     "eslint": "^9.0.0",
     "eslint-plugin-unused-imports": "^4.0.0",
+    "tailwindcss": "4.1.10",
     "typescript-eslint": "^8.29.1"
   },
   "dependencies": {

@@ -10,6 +10,7 @@ import { activateCreateDateMarkdown } from './explorer/createDateMarkdown'
 import { activateTinypng } from './tinypng/tinypng'
 import { activateVueNavigation } from './vue/activateVueNavigation'
 import { activateJavaSupport } from './java/javaSupport'
+import { activateTailwindCompletions } from './tailwind/tailwindCompletions'
 
 const jumpToSection = async (uri: vsc.Uri, section: string) => {
   const document = await vsc.workspace.openTextDocument(uri)
@@ -41,6 +42,7 @@ export function activate(context: vsc.ExtensionContext): void {
   activateTinypng(context)
   activateVueNavigation(context)
   activateJavaSupport(context)
+  activateTailwindCompletions(context)
   context.subscriptions.push(
     vsc.commands.registerCommand('extension.npm.jumpToScripts', jumpToScripts),
     vsc.commands.registerCommand('extension.npm.jumpToDependencies', jumpToDependencies),
