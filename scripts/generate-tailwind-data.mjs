@@ -114,6 +114,14 @@ function extractColorFromCss(ruleCss) {
   return unique.length === 1 ? unique[0] : null
 }
 
+function formatCssPreview(ruleCss) {
+  if (!ruleCss) {
+    return null
+  }
+  const body = ruleCss.replace(/^[^\{]+\{\s*/, '').replace(/\}\s*$/, '').trim()
+  return body || null
+}
+
 /** 仅保留常用交互态 pseudo-class variant，用于补全与解析 */
 const INTERACTION_PSEUDO_VARIANTS = new Set([
   'hover',
@@ -307,12 +315,17 @@ const classes = allClassNames
   .sort()
 
 const colors = {}
+const styles = {}
 for (const className of classes) {
-  if (!isTextOrBgClass(className)) {
-    continue
-  }
   const ruleCss = design.candidatesToCss([className])[0]
   if (!ruleCss) {
+    continue
+  }
+  const preview = formatCssPreview(ruleCss)
+  if (preview) {
+    styles[className] = preview
+  }
+  if (!isTextOrBgClass(className)) {
     continue
   }
   const hex = extractColorFromCss(ruleCss)
@@ -340,7 +353,7 @@ for (const variant of design.getVariants()) {
 }
 variants.sort()
 
-const data = { version: '4', classes, variants, colors }
+const data = { version: '4', classes, variants, colors, styles }
 fs.mkdirSync(path.dirname(outputPath), { recursive: true })
 fs.writeFileSync(outputPath, JSON.stringify(data))
-console.log(`Generated ${classes.length} classes (${allClassNames.length - classes.length} excluded), ${variants.length} variants, ${Object.keys(colors).length} colors`)
+console.log(`Generated ${classes.length} classes (${allClassNames.length - classes.length} excluded), ${variants.length} variants, ${Object.keys(colors).length} colors, ${Object.keys(styles).length} styles`)

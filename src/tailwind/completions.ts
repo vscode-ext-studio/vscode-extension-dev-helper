@@ -1,10 +1,11 @@
-import { CompletionItem, CompletionItemKind, Position, Range } from 'vscode'
+import { CompletionItem, CompletionItemKind, MarkdownString, Position, Range } from 'vscode'
 import tailwindData from './data/tailwind-default.json'
 import { getVariantsFromClassName } from './classContext'
 
 const CLASS_SEPARATOR = ':'
 const variantNames = new Set<string>(tailwindData.variants)
 const classColors = tailwindData.colors as Record<string, string>
+const classStyles = tailwindData.styles as Record<string, string>
 
 /** 补全排序：普通工具类 > 伪类 > 颜色类 > 减号开头工具类 */
 const SORT_PRIORITY = {
@@ -26,6 +27,14 @@ function getClassSortPriority(className: string, hasColor: boolean): number {
     return SORT_PRIORITY.color
   }
   return SORT_PRIORITY.utility
+}
+
+function buildCssDocumentation(css: string): MarkdownString {
+  const md = new MarkdownString()
+  md.appendMarkdown('```css\n')
+  md.appendMarkdown(css)
+  md.appendMarkdown('\n```')
+  return md
 }
 
 export interface ClassListInput {
@@ -120,6 +129,7 @@ export function completionsFromClassList(input: ClassListInput): CompletionItem[
 
     const label = `${important ? '!' : ''}${variantPrefix}${className}`
     const color = classColors[className]
+    const style = classStyles[className]
     const item = new CompletionItem(
       color
         ? { label, description: color }
@@ -132,6 +142,8 @@ export function completionsFromClassList(input: ClassListInput): CompletionItem[
     item.sortText = buildSortText(priority, classOrderByPriority[priority]++)
     if (color) {
       item.documentation = color
+    } else if (style) {
+      item.documentation = buildCssDocumentation(style)
     }
     items.push(item)
   }
