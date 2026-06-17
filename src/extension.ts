@@ -9,6 +9,7 @@ import { activateTerminalManager } from './terminal/terminalManager'
 import { activateCreateDateMarkdown } from './explorer/createDateMarkdown'
 import { activateTinypng } from './tinypng/tinypng'
 import { activateVueNavigation } from './vue/activateVueNavigation'
+import { activateJavaSupport } from './java/javaSupport'
 
 const jumpToSection = async (uri: vsc.Uri, section: string) => {
   const document = await vsc.workspace.openTextDocument(uri)
@@ -39,6 +40,7 @@ export function activate(context: vsc.ExtensionContext): void {
   activateCreateDateMarkdown(context)
   activateTinypng(context)
   activateVueNavigation(context)
+  activateJavaSupport(context)
   context.subscriptions.push(
     vsc.commands.registerCommand('extension.npm.jumpToScripts', jumpToScripts),
     vsc.commands.registerCommand('extension.npm.jumpToDependencies', jumpToDependencies),

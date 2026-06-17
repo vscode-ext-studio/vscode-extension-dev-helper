@@ -5,7 +5,13 @@ import unusedImports from 'eslint-plugin-unused-imports';
 // npx eslint "src/**/*.{ts,js}" --fix
 export default tsEslint.config(
     {
-        ignores: ['**/*.d.ts', '**/*.test.ts']
+        ignores: [
+            '**/*.d.ts',
+            '**/*.test.ts',
+            'out/**',
+            'java-simple-support/**',
+            'src/java/parser/java-ast/parser/**',
+        ]
     },
     ...tsEslint.configs.recommended,
     {

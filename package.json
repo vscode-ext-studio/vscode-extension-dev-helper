@@ -11,6 +11,7 @@
   "icon": "images/logo.png",
   "categories": [
     "Snippets",
+    "Programming Languages",
     "Other"
   ],
   "repository": {
@@ -30,7 +31,9 @@
     "onLanguage:javascriptreact",
     "onLanguage:typescriptreact",
     "onLanguage:vue",
-    "onLanguage:html"
+    "onLanguage:html",
+    "onLanguage:java",
+    "onLanguage:xml"
   ],
   "main": "./out/extension",
   "contributes": {
@@ -133,6 +136,10 @@
       {
         "command": "extension.explorer.createDateMarkdown",
         "title": "New Today Markdown"
+      },
+      {
+        "command": "java-simple-support.gotoMapper",
+        "title": "Go to Mapper"
       }
     ],
     "submenus": [
@@ -472,7 +479,12 @@
           "JSON with Comments"
         ]
       }
-    ]
+    ],
+    "configurationDefaults": {
+      "[java]": {
+        "editor.semanticHighlighting.enabled": true
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "node build.mjs --production",
@@ -492,7 +504,10 @@
     "typescript-eslint": "^8.29.1"
   },
   "dependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "fast-xml-parser": "^5.2.0",
     "inflection": "^3.0.2",
+    "java-ast": "^0.4.1",
     "typescript": "^5.0.4",
     "vscode-snippet-parser": "^0.0.5"
   }
