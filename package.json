@@ -161,7 +161,7 @@
       "editor/title": [
         {
           "command": "extension.runFile",
-          "when": "resourceLangId == javascript || resourceLangId == typescript",
+          "when": "resourceLangId == javascript || resourceLangId == typescript || (isWindows && resourceLangId == bat) || (!isWindows && resourceLangId == shellscript)",
           "group": "navigation@-2"
         },
         {

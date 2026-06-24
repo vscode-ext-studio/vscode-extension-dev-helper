@@ -1,56 +1,53 @@
 import { ExtensionContext, window, commands, workspace, Terminal, debug, TextEditor, TextDocument } from 'vscode'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 import * as path from 'path'
 import * as fs from 'fs'
-
-const execAsync = promisify(exec)
 
 interface RunnerConfig {
     command: string
     args?: string[]
 }
 
+type RunnerType = 'js' | 'ts' | 'bat' | 'sh'
+
 const defaultJsRunner: RunnerConfig = {
-    command: 'node'
+    command: 'node',
 }
 
 const defaultTsRunner: RunnerConfig = {
-    command: 'tsx'
-}
-
-interface TerminalStore {
-    [cwd: string]: Terminal;
+    command: 'tsx',
 }
 
 export function activateRunner(context: ExtensionContext) {
     context.subscriptions.push(
         commands.registerCommand('extension.runFile', () => executeFile('run')),
-        commands.registerCommand('extension.debugFile', () => executeFile('debug'))
+        commands.registerCommand('extension.debugFile', () => executeFile('debug')),
     )
 }
 
 async function executeFile(mode: 'run' | 'debug') {
     const editor = getActiveEditor()
-    if (!editor) return
+    if (!editor) {
+        return
+    }
 
     const document = editor.document
-    if (!validateDocument(document)) return
+    if (!validateDocument(document, mode)) {
+        return
+    }
 
     try {
-        const runnerConfig = getRunnerConfig(document)
+        const runnerType = getRunnerType(document)
         const filePath = document.uri.fsPath
 
         if (mode === 'run') {
-            await runFileInTerminal(filePath, runnerConfig)
+            await runFileInTerminal(filePath, runnerType, getRunnerConfig(document))
         } else {
-            await debugFile(filePath, runnerConfig)
+            await debugFile(filePath, getRunnerConfig(document))
         }
     } catch (error) {
         window.showErrorMessage(`Failed to ${mode}: ${error}`)
     }
 }
-
 
 function getActiveEditor(): TextEditor | undefined {
     const editor = window.activeTextEditor
@@ -61,9 +58,44 @@ function getActiveEditor(): TextEditor | undefined {
     return editor
 }
 
-function validateDocument(document: TextDocument): boolean {
-    if (!['javascript', 'typescript'].includes(document.languageId)) {
-        window.showErrorMessage('Only JavaScript and TypeScript files are supported')
+function getRunnerType(document: TextDocument): RunnerType {
+    if (document.languageId === 'javascript') {
+        return 'js'
+    }
+    if (document.languageId === 'typescript') {
+        return 'ts'
+    }
+    if (document.languageId === 'bat') {
+        return 'bat'
+    }
+    return 'sh'
+}
+
+function isSupportedLanguage(languageId: string): boolean {
+    if (['javascript', 'typescript'].includes(languageId)) {
+        return true
+    }
+    if (process.platform === 'win32' && languageId === 'bat') {
+        return true
+    }
+    if (process.platform !== 'win32' && languageId === 'shellscript') {
+        return true
+    }
+    return false
+}
+
+function validateDocument(document: TextDocument, mode: 'run' | 'debug'): boolean {
+    if (mode === 'debug' && !['javascript', 'typescript'].includes(document.languageId)) {
+        window.showErrorMessage('Debug is only supported for JavaScript and TypeScript')
+        return false
+    }
+
+    if (!isSupportedLanguage(document.languageId)) {
+        if (process.platform === 'win32') {
+            window.showErrorMessage('Only JavaScript, TypeScript and Batch files are supported')
+        } else {
+            window.showErrorMessage('Only JavaScript, TypeScript and Shell Script files are supported')
+        }
         return false
     }
     return true
@@ -74,6 +106,35 @@ function getRunnerConfig(document: TextDocument): RunnerConfig {
     return document.languageId === 'javascript'
         ? config.get('jsRunner') || defaultJsRunner
         : config.get('tsRunner') || defaultTsRunner
+}
+
+function quotePath(filePath: string): string {
+    return filePath.includes(' ') ? `"${filePath}"` : filePath
+}
+
+function buildRunCommand(
+    filePath: string,
+    cwd: string,
+    runnerConfig: RunnerConfig,
+    runnerType: RunnerType,
+): string {
+    const relativePath = quotePath(path.relative(cwd, filePath))
+    const args = runnerConfig.args?.join(' ') ?? ''
+
+    if (runnerType === 'bat') {
+        return `cmd /c ${relativePath}`
+    }
+    if (runnerType === 'sh') {
+        return `bash ${relativePath}`
+    }
+    return `${ignoreWarnings} ${runnerConfig.command} ${args} ${relativePath}`.trim()
+}
+
+function getRunWorkingDirectory(filePath: string, runnerType: RunnerType): Promise<string> {
+    if (runnerType === 'bat' || runnerType === 'sh') {
+        return Promise.resolve(path.dirname(filePath))
+    }
+    return getWorkingDirectory(filePath)
 }
 
 async function hasPackageJson(filePath: string): Promise<boolean> {
@@ -88,11 +149,10 @@ async function hasPackageJson(filePath: string): Promise<boolean> {
 
 export const ignoreWarnings = process.platform === 'win32' ? 'set NODE_NO_WARNINGS=1' : 'NODE_NO_WARNINGS=1'
 
-async function runFileInTerminal(filePath: string, runnerConfig: RunnerConfig) {
-    const cwd = await getWorkingDirectory(filePath)
+async function runFileInTerminal(filePath: string, runnerType: RunnerType, runnerConfig: RunnerConfig) {
+    const cwd = await getRunWorkingDirectory(filePath, runnerType)
     const terminal = getTerminalByCwd(cwd)
-    const relativePath = path.relative(cwd, filePath)
-    const command = `${ignoreWarnings} ${runnerConfig.command} ${relativePath}`
+    const command = buildRunCommand(filePath, cwd, runnerConfig, runnerType)
     terminal.show()
     terminal.sendText(command)
 }
