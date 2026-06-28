@@ -31,7 +31,7 @@ export class MemberFinder {
         return this.findMemberInSymbols(fileInfo.symbols, memberName, lombokFieldName);
     }
 
-    private findClassFileInfo(currentFileInfo: JavaFileInfo, className: string): JavaFileInfo | undefined {
+    public findClassFileInfo(currentFileInfo: JavaFileInfo, className: string): JavaFileInfo | undefined {
         const trimmed = className.trim();
         if (isQualifiedTypeName(trimmed)) {
             const directMatch = this.workspaceManager.get(currentFileInfo.modulePath, trimmed);

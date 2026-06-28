@@ -4,6 +4,7 @@ import { BaseVisitorContext, createBaseSymbol } from './baseVisitor';
 import { MethodVisitor } from './members/methodVisitor';
 import { FieldVisitor } from './members/fieldVisitor';
 import { SymbolKind } from 'vscode';
+import { extractServiceImplTypes } from '../../providers/definition/mybatisPlusResolver';
 
 export class ClassVisitor {
     private context: BaseVisitorContext;
@@ -23,6 +24,17 @@ export class ClassVisitor {
                     ...createBaseSymbol(SymbolKind.Class, ctx, this.context.document),
                     children: []
                 } as JavaSymbol;
+
+                if (ctx.EXTENDS()) {
+                    const extendsType = ctx.typeType()?.text;
+                    if (extendsType) {
+                        const serviceImplTypes = extractServiceImplTypes(extendsType);
+                        if (serviceImplTypes) {
+                            classSymbol.mapperType = serviceImplTypes.mapperType;
+                            classSymbol.entityType = serviceImplTypes.entityType;
+                        }
+                    }
+                }
 
                 this.context.symbols.push(classSymbol);
 

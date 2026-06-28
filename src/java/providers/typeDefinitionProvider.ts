@@ -4,16 +4,23 @@ import { SymbolFinder } from './definition/symbolFinder';
 import { ImportClassFinder } from './definition/importClassFinder';
 import { MemberFinder } from './definition/memberFinder';
 import { JavaFileInfo } from '../parser/javaAstParser';
+import { MybatisPlusNavigation } from './definition/mybatisPlusNavigation';
 
 export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
     private symbolFinder: SymbolFinder;
     private importClassFinder: ImportClassFinder;
     private memberFinder: MemberFinder;
+    private mybatisPlusNavigation: MybatisPlusNavigation;
 
     constructor(private workspaceManager: WorkspaceManager) {
         this.symbolFinder = new SymbolFinder();
         this.importClassFinder = new ImportClassFinder(workspaceManager);
         this.memberFinder = new MemberFinder(workspaceManager);
+        this.mybatisPlusNavigation = new MybatisPlusNavigation(
+            this.importClassFinder,
+            this.memberFinder,
+            this.symbolFinder,
+        );
     }
 
     public async provideTypeDefinition(document: TextDocument, position: Position, token: CancellationToken): Promise<Definition | undefined> {
@@ -32,12 +39,21 @@ export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
             return undefined;
         }
 
+        const genericResult = this.mybatisPlusNavigation.resolveGenericAtPosition(fileInfo, document, position);
+        if (genericResult) {
+            return genericResult;
+        }
+
         if (wordRange.start.character > 0) {
             const prevCharPosition = new Position(position.line, wordRange.start.character - 1);
             const prevCharRange = new Range(prevCharPosition, prevCharPosition.translate(0, 1));
             const prevChar = document.getText(prevCharRange);
 
             if (prevChar === '.') {
+                const mybatisPlusResult = this.mybatisPlusNavigation.resolveMember(fileInfo, document, wordRange, word);
+                if (mybatisPlusResult) {
+                    return mybatisPlusResult;
+                }
                 return this.provideMemberTypeDefinition(fileInfo, document, position, wordRange, word);
             }
         }
@@ -58,13 +74,13 @@ export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
         return this.importClassFinder.findImportedClass(fileInfo, word);
     }
 
-    private async provideMemberTypeDefinition(
+    private provideMemberTypeDefinition(
         fileInfo: JavaFileInfo,
         document: TextDocument,
         position: Position,
         wordRange: Range,
         word: string
-    ): Promise<Definition | undefined> {
+    ): Definition | undefined {
         const objectNameRange = document.getWordRangeAtPosition(
             new Position(position.line, wordRange.start.character - 2)
         );

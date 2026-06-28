@@ -32,6 +32,10 @@ export interface JavaSymbol {
     children?: JavaSymbol[];
     identifierLocation?: Position;
     isConstructor?: boolean;
+    /** MyBatis-Plus ServiceImpl 第一个泛型：Mapper 接口，如 EnterpriseLicenseMapper */
+    mapperType?: string;
+    /** MyBatis-Plus 实体类型：ServiceImpl 第二个泛型，或 BaseMapper<T> 中的 T */
+    entityType?: string;
 }
 
 export class JavaAstParser {
