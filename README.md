@@ -80,7 +80,7 @@ AST-based support for Java:
 ### MyBatis Integration
 
 - Bidirectional linking between Mapper interfaces and XML files, with **Go to Mapper** CodeLens on interfaces and methods.
-- SQL syntax highlighting injected in `*mapper.xml` files.
+- SQL syntax highlighting injected in `*Mapper.xml` and `*mapper.xml` files.
 
 ### Inline SQL Highlighting
 

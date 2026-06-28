@@ -1,14 +1,47 @@
 {
   "scopeName": "inline-sql.mapper-injection",
-  "fileTypes": ["xml"],
-  "injectionSelector": "L:text.xml -comment -string",
+  "injectionSelector": "L:text.xml.mybatis.mapper -comment -string",
   "patterns": [
     {
-      "begin": "(?<=<(sql|select|insert|update|delete)[^>]*>)",
-      "end": "(?=</(sql|select|insert|update|delete)>)",
+      "name": "meta.statement.mybatis.mapper",
+      "begin": "(<)(sql|select|insert|update|delete)\\b([^>]*)(>)",
+      "beginCaptures": {
+        "0": {
+          "name": "meta.tag.xml"
+        },
+        "1": {
+          "name": "punctuation.definition.tag.begin.xml"
+        },
+        "2": {
+          "name": "entity.name.tag.xml"
+        },
+        "4": {
+          "name": "punctuation.definition.tag.end.xml"
+        }
+      },
+      "contentName": "meta.embedded.sql",
+      "end": "(</)(sql|select|insert|update|delete)(>)",
+      "endCaptures": {
+        "0": {
+          "name": "meta.tag.xml"
+        },
+        "1": {
+          "name": "punctuation.definition.tag.begin.xml"
+        },
+        "2": {
+          "name": "entity.name.tag.xml"
+        },
+        "3": {
+          "name": "punctuation.definition.tag.end.xml"
+        }
+      },
       "patterns": [
-        { "include": "text.xml" },
-        { "include": "source.sql" }
+        {
+          "include": "text.xml"
+        },
+        {
+          "include": "source.sql"
+        }
       ]
     }
   ]

@@ -1,0 +1,8 @@
+{
+  "scopeName": "text.xml.mybatis.mapper",
+  "patterns": [
+    {
+      "include": "text.xml"
+    }
+  ]
+}
