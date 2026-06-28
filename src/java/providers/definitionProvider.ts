@@ -5,6 +5,7 @@ import { ImportClassFinder } from './definition/importClassFinder';
 import { MemberFinder } from './definition/memberFinder';
 import { MapperManager } from '../workspace/mapperManager';
 import { MybatisPlusNavigation } from './definition/mybatisPlusNavigation';
+import { resolveImportDefinition } from './definition/importNavigation';
 
 export class JavaDefinitionProvider implements DefinitionProvider {
     private symbolFinder: SymbolFinder;
@@ -40,6 +41,11 @@ export class JavaDefinitionProvider implements DefinitionProvider {
         const word = document.getText(wordRange);
         if (['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Void', 'Null'].includes(word)) {
             return undefined;
+        }
+
+        const importResult = resolveImportDefinition(fileInfo, document, position, this.importClassFinder, this.memberFinder);
+        if (importResult) {
+            return importResult;
         }
 
         const genericResult = this.mybatisPlusNavigation.resolveGenericAtPosition(fileInfo, document, position);

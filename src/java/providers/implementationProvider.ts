@@ -4,6 +4,7 @@ import { SymbolFinder } from './definition/symbolFinder';
 import { ImportClassFinder } from './definition/importClassFinder';
 import { MemberFinder } from './definition/memberFinder';
 import { MapperManager } from '../workspace/mapperManager';
+import { resolveImportDefinition } from './definition/importNavigation';
 
 export class JavaImplementationProvider implements ImplementationProvider {
     private symbolFinder: SymbolFinder;
@@ -33,6 +34,11 @@ export class JavaImplementationProvider implements ImplementationProvider {
         const word = document.getText(wordRange);
         if (['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Void', 'Null'].includes(word)) {
             return undefined;
+        }
+
+        const importResult = resolveImportDefinition(fileInfo, document, position, this.importClassFinder, this.memberFinder);
+        if (importResult) {
+            return [importResult];
         }
 
         // Check if the previous character is a dot

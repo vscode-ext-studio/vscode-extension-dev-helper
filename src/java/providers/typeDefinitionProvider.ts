@@ -5,6 +5,7 @@ import { ImportClassFinder } from './definition/importClassFinder';
 import { MemberFinder } from './definition/memberFinder';
 import { JavaFileInfo } from '../parser/javaAstParser';
 import { MybatisPlusNavigation } from './definition/mybatisPlusNavigation';
+import { resolveImportDefinition } from './definition/importNavigation';
 
 export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
     private symbolFinder: SymbolFinder;
@@ -37,6 +38,11 @@ export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
         const word = document.getText(wordRange);
         if (['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Void', 'Null'].includes(word)) {
             return undefined;
+        }
+
+        const importResult = resolveImportDefinition(fileInfo, document, position, this.importClassFinder);
+        if (importResult) {
+            return importResult;
         }
 
         const genericResult = this.mybatisPlusNavigation.resolveGenericAtPosition(fileInfo, document, position);
