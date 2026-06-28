@@ -5,6 +5,7 @@ import { ImportClassFinder } from './definition/importClassFinder';
 import { MemberFinder } from './definition/memberFinder';
 import { MapperManager } from '../workspace/mapperManager';
 import { MybatisPlusNavigation } from './definition/mybatisPlusNavigation';
+import { LombokBuilderNavigation } from './definition/lombokBuilderNavigation';
 import { resolveImportDefinition } from './definition/importNavigation';
 
 export class JavaDefinitionProvider implements DefinitionProvider {
@@ -12,6 +13,7 @@ export class JavaDefinitionProvider implements DefinitionProvider {
     private importClassFinder: ImportClassFinder;
     private memberFinder: MemberFinder;
     private mybatisPlusNavigation: MybatisPlusNavigation;
+    private lombokBuilderNavigation: LombokBuilderNavigation;
 
     constructor(
         private workspaceManager: WorkspaceManager,
@@ -25,6 +27,7 @@ export class JavaDefinitionProvider implements DefinitionProvider {
             this.memberFinder,
             this.symbolFinder,
         );
+        this.lombokBuilderNavigation = new LombokBuilderNavigation(this.memberFinder);
     }
 
     public async provideDefinition(document: TextDocument, position: Position, token: CancellationToken): Promise<Definition | undefined> {
@@ -64,6 +67,16 @@ export class JavaDefinitionProvider implements DefinitionProvider {
                 const mybatisPlusResult = this.mybatisPlusNavigation.resolveMember(fileInfo, document, wordRange, word);
                 if (mybatisPlusResult) {
                     return mybatisPlusResult;
+                }
+
+                const lombokBuilderResult = this.lombokBuilderNavigation.resolveMember(
+                    fileInfo,
+                    document,
+                    word,
+                    position,
+                );
+                if (lombokBuilderResult) {
+                    return lombokBuilderResult;
                 }
 
                 const typeNameRange = document.getWordRangeAtPosition(new Position(position.line, wordRange.start.character - 2));

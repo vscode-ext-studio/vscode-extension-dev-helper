@@ -12,12 +12,12 @@ export interface CompletionMember {
 
 const GETTER_ANNOTATIONS = new Set(['Getter', 'Data', 'Value']);
 const SETTER_ANNOTATIONS = new Set(['Setter', 'Data']);
-const BUILDER_ANNOTATIONS = new Set(['Builder']);
+export const BUILDER_ANNOTATIONS = new Set(['Builder', 'SuperBuilder']);
 
-export function parseAnnotationsOnLine(document: TextDocument, line: number): Set<string> {
+export function parseAnnotationsOnLines(lines: string[], line: number): Set<string> {
     const annotations = new Set<string>();
     for (let i = line; i >= Math.max(0, line - 8); i--) {
-        const text = document.lineAt(i).text.trim();
+        const text = lines[i].trim();
         if (!text.startsWith('@') && annotations.size > 0) {
             break;
         }
@@ -39,6 +39,18 @@ export function parseAnnotationsOnLine(document: TextDocument, line: number): Se
         }
     }
     return annotations;
+}
+
+export function parseAnnotationsOnLine(document: TextDocument, line: number): Set<string> {
+    const lines: string[] = [];
+    for (let i = 0; i < document.lineCount; i++) {
+        lines.push(document.lineAt(i).text);
+    }
+    return parseAnnotationsOnLines(lines, line);
+}
+
+export function hasBuilderAnnotation(annotations: Set<string>): boolean {
+    return hasAnyAnnotation(annotations, BUILDER_ANNOTATIONS);
 }
 
 function hasAnyAnnotation(annotations: Set<string>, names: Set<string>): boolean {
@@ -173,4 +185,57 @@ export function generateLombokMembers(fileInfo: JavaFileInfo, document: TextDocu
     }
 
     return members;
+}
+
+export function findFieldSymbol(symbols: JavaSymbol[], fieldName: string): JavaSymbol | undefined {
+    for (const symbol of symbols) {
+        if (symbol.kind === SymbolKind.Field && symbol.name === fieldName) {
+            return symbol;
+        }
+        if (symbol.children) {
+            const found = findFieldSymbol(symbol.children, fieldName);
+            if (found) {
+                return found;
+            }
+        }
+    }
+    return undefined;
+}
+
+/** 从 builder 链式调用向上收集文本，解析根类型如 User.builder() 中的 User */
+export function findBuilderRootTypeName(document: TextDocument, position: Position): string | undefined {
+    const parts: string[] = [];
+    for (let line = position.line; line >= 0; line--) {
+        const text = document.lineAt(line).text;
+        if (line === position.line) {
+            parts.unshift(text);
+            continue;
+        }
+
+        const trimmed = text.trim();
+        if (trimmed.startsWith('.')) {
+            parts.unshift(text);
+            continue;
+        }
+        if (/\.builder\s*\(/.test(text)) {
+            parts.unshift(text);
+            break;
+        }
+        if (trimmed.endsWith('(') || trimmed.endsWith(',') || trimmed.endsWith(')')) {
+            parts.unshift(text);
+            continue;
+        }
+
+        parts.unshift(text);
+        break;
+    }
+
+    const chunk = parts.join('\n');
+    const matches = [...chunk.matchAll(/(?:^|[^\w.])([\w.]+)\.builder\s*\(/gm)];
+    if (matches.length === 0) {
+        return undefined;
+    }
+    const typeName = matches[matches.length - 1][1];
+    const dotIndex = typeName.lastIndexOf('.');
+    return dotIndex >= 0 ? typeName.slice(dotIndex + 1) : typeName;
 }
