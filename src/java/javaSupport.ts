@@ -19,14 +19,18 @@ import { JavaMyBatisCodeLensProvider } from './providers/codelensProvider'
 import { JavaDiagnosticProvider } from './providers/diagnosticProvider'
 import { JavaTokenProvider } from './providers/tokenProvider'
 import { JavaCompletionProvider } from './providers/completionProvider'
+import { JdkSourceResolver } from './workspace/jdkSourceResolver'
+import { registerJdkSourceContentProvider } from './workspace/jdkSourceProtocol'
 
 export function activateJavaSupport(context: ExtensionContext): void {
   const mapperManager = new MapperManager()
   const workspaceManager = new WorkspaceManager()
   const diagnosticProvider = new JavaDiagnosticProvider(workspaceManager)
 
+  registerJdkSourceContentProvider(context)
   mapperManager.initialize()
   workspaceManager.initializeWorkspace()
+  void JdkSourceResolver.getInstance().initialize()
 
   registerGotoMapperCommand(context)
 

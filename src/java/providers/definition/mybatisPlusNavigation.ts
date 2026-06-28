@@ -33,6 +33,17 @@ export class MybatisPlusNavigation {
         return undefined;
     }
 
+    public resolveIdentifier(fileInfo: JavaFileInfo, word: string): Location | undefined {
+        if (word !== 'baseMapper') {
+            return undefined;
+        }
+        const mapperType = resolveMapperType(fileInfo.typeSymbol.name, fileInfo);
+        if (mapperType) {
+            return this.importClassFinder.findImportedClass(fileInfo, mapperType);
+        }
+        return undefined;
+    }
+
     public resolveMember(
         fileInfo: JavaFileInfo,
         document: TextDocument,
@@ -86,11 +97,13 @@ export class MybatisPlusNavigation {
         }
 
         const objectName = document.getText(objectNameRange);
-        if (objectName === 'this') {
-            return {
-                objectClassFile: fileInfo,
-                objectTypeName: fileInfo.typeSymbol.name,
-            };
+        if (objectName === 'this' || objectName === 'baseMapper') {
+            if (objectName === 'this' || resolveServiceImplTypes(fileInfo)) {
+                return {
+                    objectClassFile: fileInfo,
+                    objectTypeName: fileInfo.typeSymbol.name,
+                };
+            }
         }
 
         const objectSymbol = this.symbolFinder.findSymbolAtPosition(fileInfo, objectNameRange.start, objectName);

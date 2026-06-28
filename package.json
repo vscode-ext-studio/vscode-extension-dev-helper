@@ -472,6 +472,12 @@
           "minimum": 0,
           "markdownDescription": "Defines how much packages can be analyzed together. A high value processes faster but consumes much more CPU. Set `0` to disable this limit (but use with moderation)."
         },
+        "javaSupport.jdkHome": {
+          "order": 50,
+          "type": "string",
+          "default": "",
+          "markdownDescription": "JDK 根目录路径，用于跳转到 JDK 源码。留空时自动检测 `JAVA_HOME`、`java.home` 或系统默认 JDK。"
+        },
         "tinypng.apiKey": {
           "order": 100,
           "type": "string",

@@ -36,9 +36,6 @@ export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
         }
 
         const word = document.getText(wordRange);
-        if (['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Void', 'Null'].includes(word)) {
-            return undefined;
-        }
 
         const importResult = resolveImportDefinition(fileInfo, document, position, this.importClassFinder);
         if (importResult) {
@@ -48,6 +45,11 @@ export class JavaTypeDefinitionProvider implements TypeDefinitionProvider {
         const genericResult = this.mybatisPlusNavigation.resolveGenericAtPosition(fileInfo, document, position);
         if (genericResult) {
             return genericResult;
+        }
+
+        const mybatisPlusIdentifier = this.mybatisPlusNavigation.resolveIdentifier(fileInfo, word);
+        if (mybatisPlusIdentifier) {
+            return mybatisPlusIdentifier;
         }
 
         if (wordRange.start.character > 0) {

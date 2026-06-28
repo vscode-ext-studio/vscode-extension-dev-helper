@@ -2,6 +2,7 @@ import { JavaFileInfo } from '../../parser/javaAstParser';
 import { WorkspaceManager } from '../../workspace/workspaceManager';
 import { Location, Uri, Range, Position } from 'vscode';
 import { extractSimpleTypeName, isQualifiedTypeName } from './typeNameUtils';
+import { JdkSourceResolver } from '../../workspace/jdkSourceResolver';
 
 export class ImportClassFinder {
     constructor(private workspaceManager: WorkspaceManager) { }
@@ -17,6 +18,10 @@ export class ImportClassFinder {
             if (directMatch) {
                 return this.createLocation(directMatch);
             }
+            const jdkLocation = JdkSourceResolver.getInstance().findJdkClass(trimmed);
+            if (jdkLocation) {
+                return jdkLocation;
+            }
         }
 
         const identifier = extractSimpleTypeName(trimmed);
@@ -31,6 +36,10 @@ export class ImportClassFinder {
                 const importedFileInfo = this.workspaceManager.get(fileInfo.modulePath, qualifiedName);
                 if (importedFileInfo) {
                     return this.createLocation(importedFileInfo);
+                }
+                const jdkLocation = JdkSourceResolver.getInstance().findJdkClass(qualifiedName);
+                if (jdkLocation) {
+                    return jdkLocation;
                 }
             }
         }
@@ -49,7 +58,8 @@ export class ImportClassFinder {
             return this.createLocation(javaLangFileInfo);
         }
 
-        return undefined;
+        return JdkSourceResolver.getInstance().findJdkClassBySimpleName(identifier)
+            ?? JdkSourceResolver.getInstance().findJdkClass(trimmed);
     }
 
     private createLocation(fileInfo: JavaFileInfo): Location {

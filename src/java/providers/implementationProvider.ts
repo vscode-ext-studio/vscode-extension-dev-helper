@@ -32,9 +32,6 @@ export class JavaImplementationProvider implements ImplementationProvider {
         }
 
         const word = document.getText(wordRange);
-        if (['String', 'Integer', 'Boolean', 'Double', 'Float', 'Long', 'Short', 'Byte', 'Character', 'Void', 'Null'].includes(word)) {
-            return undefined;
-        }
 
         const importResult = resolveImportDefinition(fileInfo, document, position, this.importClassFinder, this.memberFinder);
         if (importResult) {
