@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, statSync } from 'fs'
-import { basename, format, join, resolve } from 'path'
+import { basename, dirname, format, join, resolve } from 'path'
 import {
   ThemeIcon,
   Uri,
@@ -89,26 +89,67 @@ export function activateSearchNodeModules(context: ExtensionContext) {
       return window.showErrorMessage('You must have a workspace opened.')
     }
 
-    const folder = await getWorkspaceFolder()
-    if (folder) {
-      await searchPath(folder.name, folder.uri.fsPath, NODE_MODULES)
+    const project = await selectProject()
+    if (project) {
+      await searchPath(project.name, project.root, NODE_MODULES)
     }
   })
 }
 
-async function getWorkspaceFolder() {
-  const folders = workspace.workspaceFolders
-  if (!folders?.length) {
+type ProjectPickItem = QuickPickItem & { root: string }
+
+async function selectProject(): Promise<{ name: string; root: string } | undefined> {
+  const projects = await findProjects()
+  if (projects.length === 0) {
+    await window.showErrorMessage('No projects with node_modules found.')
     return undefined
   }
-  if (folders.length > 1) {
-    const selected = await window.showQuickPick(
-      folders.map((folder) => ({ label: folder.name, folder })),
-      { placeHolder: 'Select workspace folder' },
-    )
-    return selected?.folder
+  if (projects.length === 1) {
+    return projects[0]
   }
-  return folders[0]
+  const selected = await window.showQuickPick<ProjectPickItem>(
+    projects.map((project) => ({
+      label: project.name,
+      description: workspace.asRelativePath(project.root),
+      root: project.root,
+    })),
+    { placeHolder: 'Select project' },
+  )
+  if (!selected) {
+    return undefined
+  }
+  return { name: selected.label, root: selected.root }
+}
+
+async function findProjects(): Promise<{ name: string; root: string }[]> {
+  const packageJsonFiles = await workspace.findFiles('**/package.json', '**/node_modules/**')
+  const projects: { name: string; root: string }[] = []
+  const seenRoots = new Set<string>()
+
+  for (const uri of packageJsonFiles) {
+    const root = resolve(dirname(uri.fsPath))
+    if (seenRoots.has(root)) {
+      continue
+    }
+    seenRoots.add(root)
+
+    const nodeModulesPath = join(root, NODE_MODULES)
+    if (!hasNodeModuleEntries(nodeModulesPath)) {
+      continue
+    }
+
+    projects.push({ name: basename(root), root })
+  }
+
+  projects.sort((a, b) => a.name.localeCompare(b.name))
+  return projects
+}
+
+function hasNodeModuleEntries(nodeModulesPath: string): boolean {
+  if (!existsSync(nodeModulesPath) || !statSync(nodeModulesPath).isDirectory()) {
+    return false
+  }
+  return listNodeModuleEntries(nodeModulesPath).length > 0
 }
 
 function listNodeModuleEntries(folderFullPath: string): string[] {
