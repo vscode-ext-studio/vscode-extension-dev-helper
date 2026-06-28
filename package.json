@@ -2,7 +2,7 @@
   "name": "extension-dev-helper",
   "displayName": "Extension Development Helper",
   "description": "Helper for VSCode Extension Development",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "license": "MIT",
   "publisher": "cweijan",
   "engines": {
@@ -22,23 +22,7 @@
     "url": "https://github.com/vscode-ext-studio/vscode-extension-dev-helper/issues"
   },
   "activationEvents": [
-    "onCommand:extension.tinypng.compressOverwrite",
-    "onCommand:extension.tinypng.compressWithSuffix",
-    "onCommand:extension.explorer.createDateMarkdown",
-    "onLanguage:json",
-    "onLanguage:javascript",
-    "onLanguage:typescript",
-    "onLanguage:javascriptreact",
-    "onLanguage:typescriptreact",
-    "onLanguage:vue",
-    "onLanguage:html",
-    "onLanguage:css",
-    "onLanguage:less",
-    "onLanguage:scss",
-    "onLanguage:sass",
-    "onLanguage:stylus",
-    "onLanguage:java",
-    "onLanguage:xml"
+    "onStartupFinished"
   ],
   "main": "./out/extension",
   "contributes": {

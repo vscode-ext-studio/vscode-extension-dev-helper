@@ -1,6 +1,7 @@
 import { ExtensionContext, window, commands, workspace, Terminal, debug, TextDocument, Uri } from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
+import { activateShellScriptCodeLens } from './shellScriptCodeLens'
 
 interface RunnerConfig {
     command: string
@@ -18,6 +19,7 @@ const defaultTsRunner: RunnerConfig = {
 }
 
 export function activateRunner(context: ExtensionContext) {
+    activateShellScriptCodeLens(context)
     context.subscriptions.push(
         commands.registerCommand('extension.runFile', (uri?: Uri) => executeFile('run', uri)),
         commands.registerCommand('extension.debugFile', (uri?: Uri) => executeFile('debug', uri)),
