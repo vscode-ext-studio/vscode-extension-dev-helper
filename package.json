@@ -2,7 +2,7 @@
   "name": "extension-dev-helper",
   "displayName": "Extension Development Helper",
   "description": "Helper for VSCode Extension Development",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "license": "MIT",
   "publisher": "cweijan",
   "engines": {
@@ -213,6 +213,11 @@
         }
       ],
       "editor/context": [
+        {
+          "command": "extension.runFile",
+          "when": "(isWindows && resourceLangId == bat) || (!isWindows && resourceLangId == shellscript)",
+          "group": "navigation@-2"
+        },
         {
           "command": "extension.gotoNpm",
           "when": "resourceFilename == package.json || resourceFilename == dependencies.jsonc",

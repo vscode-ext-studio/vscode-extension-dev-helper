@@ -1,4 +1,4 @@
-import { ExtensionContext, window, commands, workspace, Terminal, debug, TextEditor, TextDocument } from 'vscode'
+import { ExtensionContext, window, commands, workspace, Terminal, debug, TextDocument, Uri } from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
 
@@ -19,18 +19,16 @@ const defaultTsRunner: RunnerConfig = {
 
 export function activateRunner(context: ExtensionContext) {
     context.subscriptions.push(
-        commands.registerCommand('extension.runFile', () => executeFile('run')),
-        commands.registerCommand('extension.debugFile', () => executeFile('debug')),
+        commands.registerCommand('extension.runFile', (uri?: Uri) => executeFile('run', uri)),
+        commands.registerCommand('extension.debugFile', (uri?: Uri) => executeFile('debug', uri)),
     )
 }
 
-async function executeFile(mode: 'run' | 'debug') {
-    const editor = getActiveEditor()
-    if (!editor) {
+async function executeFile(mode: 'run' | 'debug', uri?: Uri) {
+    const document = await resolveDocument(uri)
+    if (!document) {
         return
     }
-
-    const document = editor.document
     if (!validateDocument(document, mode)) {
         return
     }
@@ -49,13 +47,16 @@ async function executeFile(mode: 'run' | 'debug') {
     }
 }
 
-function getActiveEditor(): TextEditor | undefined {
+async function resolveDocument(uri?: Uri): Promise<TextDocument | undefined> {
+    if (uri) {
+        return workspace.openTextDocument(uri)
+    }
     const editor = window.activeTextEditor
     if (!editor) {
         window.showErrorMessage('No active editor')
         return undefined
     }
-    return editor
+    return editor.document
 }
 
 function getRunnerType(document: TextDocument): RunnerType {
