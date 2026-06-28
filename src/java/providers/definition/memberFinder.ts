@@ -2,49 +2,80 @@ import { Position, Location, Uri, SymbolKind } from 'vscode';
 import { TextDocument } from 'vscode';
 import { WorkspaceManager } from '../../workspace/workspaceManager';
 import { JavaFileInfo, JavaSymbol } from '../../parser/javaAstParser';
+import { extractSimpleTypeName, isQualifiedTypeName } from './typeNameUtils';
 
 export class MemberFinder {
     constructor(private workspaceManager: WorkspaceManager) { }
 
-    public async findMember(currentFileInfo: JavaFileInfo, memberName: string, className: string): Promise<Location | undefined> {
+    public findMember(currentFileInfo: JavaFileInfo, memberName: string, className: string): Location | undefined {
+        const memberSymbol = this.findMemberSymbol(currentFileInfo, memberName, className);
+        if (memberSymbol) {
+            const fileInfo = this.findClassFileInfo(currentFileInfo, className);
+            if (fileInfo) {
+                return new Location(Uri.parse(fileInfo.uri), memberSymbol.range);
+            }
+        }
+        return undefined;
+    }
+
+    public findMemberSymbol(currentFileInfo: JavaFileInfo, memberName: string, className: string): JavaSymbol | undefined {
+        const fileInfo = this.findClassFileInfo(currentFileInfo, className);
+        if (!fileInfo) {
+            return undefined;
+        }
+
         let lombokFieldName = memberName.replace(/^(get|set)/, '');
         if (lombokFieldName.length > 0) {
             lombokFieldName = lombokFieldName.charAt(0).toLowerCase() + lombokFieldName.slice(1);
         }
+        return this.findMemberInSymbols(fileInfo.symbols, memberName, lombokFieldName);
+    }
+
+    private findClassFileInfo(currentFileInfo: JavaFileInfo, className: string): JavaFileInfo | undefined {
+        const trimmed = className.trim();
+        if (isQualifiedTypeName(trimmed)) {
+            const directMatch = this.workspaceManager.get(currentFileInfo.modulePath, trimmed);
+            if (directMatch) {
+                return directMatch;
+            }
+        }
+
+        const simpleClassName = extractSimpleTypeName(trimmed);
+
         for (const importInfo of currentFileInfo.importInfos) {
             const isWildcardImport = importInfo.identifier === '*';
-            if (importInfo.identifier === className || isWildcardImport) {
-                const qualifiedName = isWildcardImport ? importInfo.qualifiedName.replace(/\*/g, className) : importInfo.qualifiedName;
+            if (importInfo.identifier === simpleClassName || isWildcardImport) {
+                const qualifiedName = isWildcardImport ? importInfo.qualifiedName.replace(/\*/g, simpleClassName) : importInfo.qualifiedName;
                 const fileInfo = this.workspaceManager.get(currentFileInfo.modulePath, qualifiedName);
                 if (fileInfo) {
-                    return this.findMemberInSymbols(fileInfo.symbols, memberName, lombokFieldName, fileInfo.uri);
+                    return fileInfo;
                 }
             }
         }
 
         if (currentFileInfo.packageName) {
-            const qualifiedName = `${currentFileInfo.packageName}.${className}`;
+            const qualifiedName = `${currentFileInfo.packageName}.${simpleClassName}`;
             const fileInfo = this.workspaceManager.get(currentFileInfo.modulePath, qualifiedName);
             if (fileInfo) {
-                return this.findMemberInSymbols(fileInfo.symbols, memberName, lombokFieldName, fileInfo.uri);
+                return fileInfo;
             }
         }
 
         return undefined;
     }
 
-    private findMemberInSymbols(symbols: JavaSymbol[], memberName: string, lombokFieldName: string, uri: string): Location | undefined {
+    private findMemberInSymbols(symbols: JavaSymbol[], memberName: string, lombokFieldName: string): JavaSymbol | undefined {
         for (const symbol of symbols) {
             if (symbol.name === memberName &&
                 [SymbolKind.Method, SymbolKind.Field, SymbolKind.Constant, SymbolKind.EnumMember].includes(symbol.kind)
             ) {
-                return new Location(Uri.parse(uri), symbol.range);
+                return symbol;
             } else if (symbol.name === lombokFieldName && symbol.kind === SymbolKind.Field) {
-                return new Location(Uri.parse(uri), symbol.range);
+                return symbol;
             }
 
             if (symbol.children) {
-                const result = this.findMemberInSymbols(symbol.children, memberName, lombokFieldName, uri);
+                const result = this.findMemberInSymbols(symbol.children, memberName, lombokFieldName);
                 if (result) {
                     return result;
                 }

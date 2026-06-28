@@ -1,12 +1,29 @@
 import { JavaFileInfo } from '../../parser/javaAstParser';
 import { WorkspaceManager } from '../../workspace/workspaceManager';
 import { Location, Uri, Range, Position } from 'vscode';
+import { extractSimpleTypeName, isQualifiedTypeName } from './typeNameUtils';
 
 export class ImportClassFinder {
     constructor(private workspaceManager: WorkspaceManager) { }
 
-    public findImportedClass(fileInfo: JavaFileInfo, identifier: string): Location | undefined {
-        // 检查导入的类
+    public findImportedClass(fileInfo: JavaFileInfo, typeName: string): Location | undefined {
+        const trimmed = typeName.trim();
+        if (!trimmed) {
+            return undefined;
+        }
+
+        if (isQualifiedTypeName(trimmed)) {
+            const directMatch = this.workspaceManager.get(fileInfo.modulePath, trimmed);
+            if (directMatch) {
+                return this.createLocation(directMatch);
+            }
+        }
+
+        const identifier = extractSimpleTypeName(trimmed);
+        if (!identifier) {
+            return undefined;
+        }
+
         for (const importInfo of fileInfo.importInfos) {
             const isWildcardImport = importInfo.identifier === '*';
             if (importInfo.identifier === identifier || isWildcardImport) {
@@ -18,13 +35,18 @@ export class ImportClassFinder {
             }
         }
 
-        // 检查同包下的类
         if (fileInfo.packageName) {
             const samePackageType = `${fileInfo.packageName}.${identifier}`;
             const samePackageFileInfo = this.workspaceManager.get(fileInfo.modulePath, samePackageType);
             if (samePackageFileInfo) {
                 return this.createLocation(samePackageFileInfo);
             }
+        }
+
+        const javaLangType = `java.lang.${identifier}`;
+        const javaLangFileInfo = this.workspaceManager.get(fileInfo.modulePath, javaLangType);
+        if (javaLangFileInfo) {
+            return this.createLocation(javaLangFileInfo);
         }
 
         return undefined;

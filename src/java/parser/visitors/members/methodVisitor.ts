@@ -2,6 +2,7 @@ import { createVisitor, MethodDeclarationContext, ConstructorDeclarationContext,
 import { JavaSymbol } from '../../javaAstParser';
 import { MemberVisitor } from './memberVisitor';
 import { SymbolKind } from 'vscode';
+import { inferTypeFromVarInitializer } from '../../../providers/definition/typeNameUtils';
 
 export class MethodVisitor extends MemberVisitor {
 
@@ -62,26 +63,39 @@ export class MethodVisitor extends MemberVisitor {
 
     private parseLocalVariables(ctx: MethodDeclarationContext): JavaSymbol[] {
         const localVariables: JavaSymbol[] = [];
-        const block = ctx.methodBody()?.block();
-        if (block) {
-            for (const blockStatement of block.blockStatement()) {
-                const localVariableDeclaration = blockStatement.localVariableDeclaration();
-                if (localVariableDeclaration) {
-                    const typeType = localVariableDeclaration.typeType();
-                    const typeName = typeType?.text || '';
-                    const variableDeclarators = localVariableDeclaration.variableDeclarators();
-                    if (variableDeclarators) {
-                        for (const declarator of variableDeclarators.variableDeclarator()) {
-                            const variableDeclaratorId = declarator.variableDeclaratorId();
-                            if (variableDeclaratorId) {
-                                const localVariableSymbol = this.createSymbolWithType(SymbolKind.Variable, variableDeclaratorId, typeName);
-                                localVariables.push(localVariableSymbol);
+        const methodBody = ctx.methodBody();
+        if (!methodBody) {
+            return localVariables;
+        }
+
+        const visitor = createVisitor({
+            visitLocalVariableDeclaration: (localVarCtx) => {
+                const typeType = localVarCtx.typeType();
+                let typeName = typeType?.text || '';
+                const variableDeclarators = localVarCtx.variableDeclarators();
+                if (variableDeclarators) {
+                    for (const declarator of variableDeclarators.variableDeclarator()) {
+                        const variableDeclaratorId = declarator.variableDeclaratorId();
+                        if (!variableDeclaratorId) {
+                            continue;
+                        }
+                        if (typeName === 'var') {
+                            const initializer = declarator.variableInitializer();
+                            if (initializer) {
+                                const inferred = inferTypeFromVarInitializer(initializer.text);
+                                if (inferred) {
+                                    typeName = inferred;
+                                }
                             }
                         }
+                        const localVariableSymbol = this.createSymbolWithType(SymbolKind.Variable, variableDeclaratorId, typeName);
+                        localVariables.push(localVariableSymbol);
                     }
                 }
+                return 1;
             }
-        }
+        });
+        visitor.visit(methodBody);
         return localVariables;
     }
 
