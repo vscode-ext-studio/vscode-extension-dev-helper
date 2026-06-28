@@ -1,4 +1,11 @@
 import { JavaFileInfo } from '../parser/javaAstParser';
+import { SymbolKind } from 'vscode';
+
+export interface WorkspaceTypeInfo {
+    simpleName: string;
+    qualifiedName: string;
+    kind: SymbolKind;
+}
 
 export class JavaFileCache {
     private pathCache: { [key: string]: JavaFileInfo } = {};
@@ -39,6 +46,61 @@ export class JavaFileCache {
 
     public clear(): void {
         this.cache = {};
+    }
+
+    public findTypesBySimpleName(prefix: string): WorkspaceTypeInfo[] {
+        const results: WorkspaceTypeInfo[] = [];
+        const seen = new Set<string>();
+
+        for (const module in this.cache) {
+            for (const qualifiedName in this.cache[module]) {
+                const info = this.cache[module][qualifiedName];
+                const simpleName = info.typeSymbol?.name;
+                if (!simpleName || !simpleName.startsWith(prefix)) {
+                    continue;
+                }
+                if (seen.has(qualifiedName)) {
+                    continue;
+                }
+                seen.add(qualifiedName);
+                results.push({
+                    simpleName,
+                    qualifiedName,
+                    kind: info.typeSymbol.kind,
+                });
+            }
+        }
+
+        return results;
+    }
+
+    public findTypesByQualifiedPrefix(prefix: string): WorkspaceTypeInfo[] {
+        const results: WorkspaceTypeInfo[] = [];
+        const seen = new Set<string>();
+
+        for (const module in this.cache) {
+            for (const qualifiedName in this.cache[module]) {
+                if (!qualifiedName.startsWith(prefix)) {
+                    continue;
+                }
+                const info = this.cache[module][qualifiedName];
+                const simpleName = info.typeSymbol?.name;
+                if (!simpleName) {
+                    continue;
+                }
+                if (seen.has(qualifiedName)) {
+                    continue;
+                }
+                seen.add(qualifiedName);
+                results.push({
+                    simpleName,
+                    qualifiedName,
+                    kind: info.typeSymbol.kind,
+                });
+            }
+        }
+
+        return results;
     }
 
 } 

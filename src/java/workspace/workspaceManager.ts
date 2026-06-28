@@ -55,4 +55,12 @@ export class WorkspaceManager {
         }
         return info;
     }
+
+    public findTypesBySimpleName(prefix: string) {
+        return this.cache.findTypesBySimpleName(prefix);
+    }
+
+    public findTypesByQualifiedPrefix(prefix: string) {
+        return this.cache.findTypesByQualifiedPrefix(prefix);
+    }
 } 

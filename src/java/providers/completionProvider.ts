@@ -10,11 +10,13 @@ import {
 } from 'vscode';
 import { WorkspaceManager } from '../workspace/workspaceManager';
 import { JavaFileInfo, JavaSymbol } from '../parser/javaAstParser';
+import { WorkspaceTypeInfo } from '../workspace/javaFileCache';
 import { MemberFinder } from './definition/memberFinder';
 import { SymbolFinder } from './definition/symbolFinder';
 import { getCompletionContext } from './completion/completionContext';
 import { MemberCollector } from './completion/memberCollector';
 import { CompletionMember } from './completion/lombokSupport';
+import { createImportEdit, isImportRequired } from './completion/importUtils';
 
 const KEYWORDS = [
     'abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch',
@@ -58,7 +60,7 @@ export class JavaCompletionProvider implements CompletionItemProvider {
             return this.provideImportCompletions(fileInfo, context.prefix);
         }
 
-        return this.provideGeneralCompletions(fileInfo, context.prefix);
+        return this.provideGeneralCompletions(fileInfo, document, context.prefix);
     }
 
     private async provideMemberCompletions(
@@ -88,21 +90,38 @@ export class JavaCompletionProvider implements CompletionItemProvider {
 
     private provideImportCompletions(fileInfo: JavaFileInfo, prefix: string): CompletionItem[] {
         const items: CompletionItem[] = [];
-        const lastDot = prefix.lastIndexOf('.');
-        const simplePrefix = lastDot >= 0 ? prefix.substring(lastDot + 1) : prefix;
+        if (!prefix) {
+            return items;
+        }
 
-        for (const importInfo of fileInfo.importInfos) {
-            if (importInfo.identifier.startsWith(simplePrefix)) {
-                const item = new CompletionItem(importInfo.identifier, CompletionItemKind.Class);
-                item.detail = importInfo.qualifiedName;
-                items.push(item);
+        const added = new Set<string>();
+        const lastDot = prefix.lastIndexOf('.');
+
+        let types: WorkspaceTypeInfo[];
+        if (lastDot >= 0) {
+            const packagePrefix = prefix.substring(0, lastDot + 1);
+            const simplePrefix = prefix.substring(lastDot + 1);
+            types = this.workspaceManager.findTypesByQualifiedPrefix(packagePrefix)
+                .filter(type => type.simpleName.startsWith(simplePrefix));
+        } else {
+            types = this.workspaceManager.findTypesBySimpleName(prefix);
+        }
+
+        for (const type of types) {
+            if (added.has(type.qualifiedName)) {
+                continue;
             }
+            added.add(type.qualifiedName);
+            const item = new CompletionItem(type.qualifiedName, this.typeKindToCompletionKind(type.kind));
+            item.detail = type.simpleName;
+            item.sortText = `0_${type.qualifiedName}`;
+            items.push(item);
         }
 
         return items;
     }
 
-    private provideGeneralCompletions(fileInfo: JavaFileInfo, prefix: string): CompletionItem[] {
+    private provideGeneralCompletions(fileInfo: JavaFileInfo, document: TextDocument, prefix: string): CompletionItem[] {
         const items: CompletionItem[] = [];
         const added = new Set<string>();
 
@@ -116,11 +135,15 @@ export class JavaCompletionProvider implements CompletionItemProvider {
         }
 
         for (const importInfo of fileInfo.importInfos) {
+            if (importInfo.identifier === '*') {
+                continue;
+            }
             if (!prefix || importInfo.identifier.startsWith(prefix)) {
-                if (!added.has(importInfo.identifier)) {
-                    added.add(importInfo.identifier);
+                if (!added.has(importInfo.qualifiedName)) {
+                    added.add(importInfo.qualifiedName);
                     const item = new CompletionItem(importInfo.identifier, CompletionItemKind.Class);
                     item.detail = importInfo.qualifiedName;
+                    item.sortText = `0_${importInfo.identifier}`;
                     items.push(item);
                 }
             }
@@ -128,7 +151,40 @@ export class JavaCompletionProvider implements CompletionItemProvider {
 
         this.collectSymbolCompletions(fileInfo.symbols, items, added, prefix);
 
+        if (prefix) {
+            for (const type of this.workspaceManager.findTypesBySimpleName(prefix)) {
+                const item = this.createTypeCompletionItem(fileInfo, document, type, added);
+                if (item) {
+                    items.push(item);
+                }
+            }
+        }
+
         return items;
+    }
+
+    private createTypeCompletionItem(
+        fileInfo: JavaFileInfo,
+        document: TextDocument,
+        type: WorkspaceTypeInfo,
+        added: Set<string>,
+    ): CompletionItem | undefined {
+        if (added.has(type.qualifiedName)) {
+            return undefined;
+        }
+        added.add(type.qualifiedName);
+
+        const item = new CompletionItem(type.simpleName, this.typeKindToCompletionKind(type.kind));
+        item.detail = type.qualifiedName;
+
+        if (isImportRequired(fileInfo, type.qualifiedName)) {
+            item.sortText = `2_${type.simpleName}`;
+            item.additionalTextEdits = [createImportEdit(document, type.qualifiedName)];
+        } else {
+            item.sortText = `1_${type.simpleName}`;
+        }
+
+        return item;
     }
 
     private collectSymbolCompletions(
@@ -139,18 +195,32 @@ export class JavaCompletionProvider implements CompletionItemProvider {
     ): void {
         for (const symbol of symbols) {
             if (!prefix || symbol.name.startsWith(prefix)) {
-                if (!added.has(symbol.name)) {
-                    added.add(symbol.name);
+                const key = symbol.name;
+                if (!added.has(key)) {
+                    added.add(key);
                     const item = new CompletionItem(symbol.name, this.toCompletionItemKind(symbol.kind));
                     if (symbol.typeName) {
                         item.detail = symbol.typeName;
                     }
+                    item.sortText = `1_${symbol.name}`;
                     items.push(item);
                 }
             }
             if (symbol.children) {
                 this.collectSymbolCompletions(symbol.children, items, added, prefix);
             }
+        }
+    }
+
+    private typeKindToCompletionKind(kind: SymbolKind): CompletionItemKind {
+        switch (kind) {
+            case SymbolKind.Interface:
+                return CompletionItemKind.Interface;
+            case SymbolKind.Enum:
+                return CompletionItemKind.Enum;
+            case SymbolKind.Class:
+            default:
+                return CompletionItemKind.Class;
         }
     }
 
