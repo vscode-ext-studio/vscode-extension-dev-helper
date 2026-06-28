@@ -18,6 +18,7 @@ import { MapperManager } from './workspace/mapperManager'
 import { JavaMyBatisCodeLensProvider } from './providers/codelensProvider'
 import { JavaDiagnosticProvider } from './providers/diagnosticProvider'
 import { JavaTokenProvider } from './providers/tokenProvider'
+import { JavaCompletionProvider } from './providers/completionProvider'
 
 export function activateJavaSupport(context: ExtensionContext): void {
   const mapperManager = new MapperManager()
@@ -47,6 +48,7 @@ export function activateJavaSupport(context: ExtensionContext): void {
     languages.registerImplementationProvider(selector, new JavaImplementationProvider(workspaceManager, mapperManager)),
     languages.registerCodeLensProvider(selector, new JavaMyBatisCodeLensProvider(workspaceManager, mapperManager)),
     languages.registerDocumentSemanticTokensProvider(selector, new JavaTokenProvider(workspaceManager), legend),
+    languages.registerCompletionItemProvider(selector, new JavaCompletionProvider(workspaceManager), '.'),
     documentChange,
     diagnosticProvider,
   )
